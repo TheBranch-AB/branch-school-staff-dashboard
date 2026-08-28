@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>The Branch School Staff Dashboard</title>
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* Make only the large center Staff Dashboard logo fill its circle. */
+    .badge-stage .logo-shell {
+      padding: 0 !important;
+      overflow: hidden;
+    }
+    .badge-stage .portal-badge {
+      width: 112% !important;
+      height: 112% !important;
+      max-width: none !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      position: relative;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
