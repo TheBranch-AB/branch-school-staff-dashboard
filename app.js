@@ -14,7 +14,7 @@ updateDateTime();
 setInterval(updateDateTime,30000);
 
 function prettifyNameFromEmail(email){
-  if(!email) return "Student";
+  if(!email) return "Staff Member";
   const local=email.split("@")[0].replace(/[._-]+/g," ").trim();
   return local.split(" ").filter(Boolean)
     .map(p=>p.charAt(0).toUpperCase()+p.slice(1))
@@ -22,14 +22,14 @@ function prettifyNameFromEmail(email){
 }
 
 // Website version: Google identity will be populated after OAuth is connected.
-function setStudentInfo(name="Student", email="Google sign-in not connected yet"){
+function setStudentInfo(name="Staff Member", email="Google sign-in not connected yet"){
   document.getElementById("studentName").textContent = name;
   document.getElementById("studentEmail").textContent = email;
   document.getElementById("avatar").textContent = (name || "S").charAt(0).toUpperCase();
   document.getElementById("accountStatus").textContent =
-    email && email.endsWith("@branchschool.org") ? "Branch account" : "Not connected";
+    email && email.toLowerCase().endsWith("@thebranchschool.org") ? "Branch staff" : "Not connected";
 }
-setStudentInfo("Student", "Waiting for Google sign-in...");
+setStudentInfo("Staff Member", "Waiting for Google sign-in...");
 
 function parseCsv(text){
   const rows=[];
@@ -94,10 +94,10 @@ function truthy(value){
 }
 
 function audienceMatches(value){
-  const target=(window.PORTAL_CONFIG?.studentAudience || "All").trim().toLowerCase();
+  const target=(window.PORTAL_CONFIG?.staffAudience || "All Staff").trim().toLowerCase();
   const raw=(value || "All").trim().toLowerCase();
 
-  if(raw === "" || raw === "all" || raw === "all students") return true;
+  if(raw === "" || raw === "all" || raw === "all students" || raw === "all staff" || raw === "staff") return true;
   if(target === "all") return false;
 
   return raw.split(/[;,|]/).map(x=>x.trim()).includes(target);
@@ -216,32 +216,32 @@ function decodeGoogleCredential(token) {
 
 function saveSignedInUser(name, email) {
   localStorage.setItem(
-    "branchPortalUser",
+    "branchStaffDashboardUser",
     JSON.stringify({ name, email })
   );
 }
 
 function restoreSignedInUser() {
-  const savedUser = localStorage.getItem("branchPortalUser");
+  const savedUser = localStorage.getItem("branchStaffDashboardUser");
   if (!savedUser) return false;
 
   try {
     const user = JSON.parse(savedUser);
     const allowedDomain =
-      (window.PORTAL_CONFIG?.allowedDomain || "branchschool.org").toLowerCase();
+      (window.PORTAL_CONFIG?.allowedDomain || "thebranchschool.org").toLowerCase();
 
     if (!user?.email ||
         !user.email.toLowerCase().endsWith("@" + allowedDomain)) {
-      localStorage.removeItem("branchPortalUser");
+      localStorage.removeItem("branchStaffDashboardUser");
       return false;
     }
 
-    setStudentInfo(user.name || "Student", user.email);
-    document.getElementById("accountStatus").textContent = "Branch account";
+    setStudentInfo(user.name || "Staff Member", user.email);
+    document.getElementById("accountStatus").textContent = "Branch staff";
     return true;
   } catch (error) {
     console.warn("Could not restore saved student profile:", error);
-    localStorage.removeItem("branchPortalUser");
+    localStorage.removeItem("branchStaffDashboardUser");
     return false;
   }
 }
@@ -250,9 +250,9 @@ function handleGoogleSignIn(response) {
   try {
     const user = decodeGoogleCredential(response.credential);
     const email = user.email || "";
-    const name = user.name || "Student";
+    const name = user.name || "Staff Member";
     const allowedDomain =
-      (window.PORTAL_CONFIG?.allowedDomain || "branchschool.org").toLowerCase();
+      (window.PORTAL_CONFIG?.allowedDomain || "thebranchschool.org").toLowerCase();
 
     if (!email.toLowerCase().endsWith("@" + allowedDomain)) {
       document.getElementById("accountStatus").textContent =
@@ -261,7 +261,7 @@ function handleGoogleSignIn(response) {
     }
 
     setStudentInfo(name, email);
-    document.getElementById("accountStatus").textContent = "Branch account";
+    document.getElementById("accountStatus").textContent = "Branch staff";
     saveSignedInUser(name, email);
   } catch (error) {
     console.error("Google sign-in failed:", error);
@@ -320,8 +320,8 @@ let classroomAccessToken = "";
 let weekCalendarEvents = [];
 let classroomAssignments = [];
 
-const GOOGLE_DATA_SESSION_KEY = "branchPortalGoogleDataToken";
-const GOOGLE_DATA_LOCAL_KEY = "branchPortalGoogleDataTokenPersistent";
+const GOOGLE_DATA_SESSION_KEY = "branchStaffDashboardGoogleDataToken";
+const GOOGLE_DATA_LOCAL_KEY = "branchStaffDashboardGoogleDataTokenPersistent";
 let automaticGoogleDataAttempted = false;
 
 function saveGoogleDataToken(tokenResponse) {
@@ -372,7 +372,7 @@ function restoreGoogleDataToken() {
 
 function hasSavedBranchPortalUser() {
   try {
-    return Boolean(localStorage.getItem("branchPortalUser"));
+    return Boolean(localStorage.getItem("branchStaffDashboardUser"));
   } catch (error) {
     return false;
   }
@@ -408,9 +408,7 @@ function initializeCalendarAuth() {
     client_id: clientId,
     scope: [
       "https://www.googleapis.com/auth/calendar.events.readonly",
-      "https://www.googleapis.com/auth/calendar.readonly",
-      "https://www.googleapis.com/auth/classroom.courses.readonly",
-      "https://www.googleapis.com/auth/classroom.coursework.me.readonly"
+      "https://www.googleapis.com/auth/calendar.readonly"
     ].join(" "),
     callback: async tokenResponse => {
       if (tokenResponse.error) {
@@ -423,10 +421,10 @@ function initializeCalendarAuth() {
       saveGoogleDataToken(tokenResponse);
 
       await Promise.allSettled([
-        loadWeekdayCalendar(),
-        loadClassroomAssignments()
+        loadWeekdayCalendar()
       ]);
       renderMiniWeekCalendar();
+      renderLogoAssignmentHover();
     }
   });
 
@@ -434,9 +432,11 @@ function initializeCalendarAuth() {
   // rebuild the dashboard automatically without another click.
   if (restoreGoogleDataToken()) {
     Promise.allSettled([
-      loadWeekdayCalendar(),
-      loadClassroomAssignments()
-    ]).then(renderMiniWeekCalendar);
+      loadWeekdayCalendar()
+    ]).then(() => {
+      renderMiniWeekCalendar();
+      renderLogoAssignmentHover();
+    });
   } else {
     renderMiniWeekCalendar();
 
@@ -699,79 +699,59 @@ function renderMiniWeekCalendar() {
 
   const daysHost = host.querySelector("#branchMiniWeekDays");
   const status = host.querySelector("#branchMiniWeekStatus");
-  const classroomText = host.querySelector("#branchClassroomSummaryText");
-  const classroomLink = host.querySelector("#branchClassroomSummaryLink");
   if (!daysHost || !status) return;
 
-  const items = getWeekScheduleItems();
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const now = new Date();
+  const items = getWeekScheduleItems()
+    .filter(item => item.type === "calendar" && item.sortDate && item.sortDate >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+    .slice(0, 5);
 
   daysHost.innerHTML = "";
 
-  // Only render dates that actually contain an event or Classroom due date.
-  const grouped = new Map();
   items.forEach(item => {
     const d = item.sortDate;
-    if (!d || Number.isNaN(d.getTime())) return;
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    if (!grouped.has(key)) grouped.set(key, { day: new Date(d.getFullYear(), d.getMonth(), d.getDate()), items: [] });
-    grouped.get(key).items.push(item);
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    const itemKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+    const row = document.createElement("div");
+    row.className = `branch-miniweek-day${itemKey === todayKey ? " is-today" : ""}`;
+
+    const dateBlock = document.createElement("div");
+    dateBlock.innerHTML = `
+      <div class="branch-miniweek-dayname">${d.toLocaleDateString([], {month:"short"})}</div>
+      <div class="branch-miniweek-date">${d.getDate()}</div>`;
+
+    const events = document.createElement("div");
+    events.className = "branch-miniweek-events";
+
+    const eventEl = document.createElement("button");
+    eventEl.type = "button";
+    eventEl.className = "branch-miniweek-event calendar";
+    eventEl.innerHTML = `
+      <div class="branch-miniweek-event-title"></div>
+      <div class="branch-miniweek-event-time"></div>`;
+    eventEl.querySelector(".branch-miniweek-event-title").textContent = item.title || "Untitled event";
+    eventEl.querySelector(".branch-miniweek-event-time").textContent =
+      [item.timeText, item.sourceText].filter(Boolean).join(" • ");
+    eventEl.addEventListener("click", () => showScheduleItemDetails(item));
+
+    events.appendChild(eventEl);
+    row.append(dateBlock, events);
+    daysHost.appendChild(row);
   });
 
-  [...grouped.values()]
-    .sort((a, b) => a.day - b.day)
-    .forEach(group => {
-      const day = group.day;
-      const dayKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
-      const column = document.createElement("div");
-      column.className = `branch-miniweek-day${dayKey === todayKey ? " is-today" : ""}`;
-
-      const heading = document.createElement("div");
-      heading.innerHTML = `
-        <div class="branch-miniweek-dayname">${day.toLocaleDateString([], { weekday: "short" })}</div>
-        <div class="branch-miniweek-date">${day.getDate()}</div>`;
-      column.appendChild(heading);
-
-      const events = document.createElement("div");
-      events.className = "branch-miniweek-events";
-
-      group.items.slice(0, 4).forEach(item => {
-        const eventEl = document.createElement("button");
-        eventEl.type = "button";
-        eventEl.className = `branch-miniweek-event ${item.type === "classroom" ? "classroom" : "calendar"}`;
-        eventEl.title = `${item.title}${item.sourceText ? " • " + item.sourceText : ""}`;
-        eventEl.innerHTML = `
-          <div class="branch-miniweek-event-title"></div>
-          <div class="branch-miniweek-event-time"></div>`;
-        eventEl.querySelector(".branch-miniweek-event-title").textContent = item.title || "Untitled item";
-        eventEl.querySelector(".branch-miniweek-event-time").textContent = item.timeText || "";
-        eventEl.addEventListener("click", () => showScheduleItemDetails(item));
-        events.appendChild(eventEl);
-      });
-
-      if (group.items.length > 4) {
-        const more = document.createElement("button");
-        more.type = "button";
-        more.className = "branch-miniweek-connect";
-        more.textContent = `+${group.items.length - 4} more`;
-        more.addEventListener("click", showWeekdayCalendarEvents);
-        events.appendChild(more);
-      }
-
-      column.appendChild(events);
-      daysHost.appendChild(column);
-    });
-
-  if (!items.length && calendarAccessToken && classroomAccessToken) {
+  if (!items.length && calendarAccessToken) {
     const empty = document.createElement("div");
     empty.className = "branch-miniweek-noitems";
-    empty.textContent = "No events or due dates this week.";
+    empty.textContent = "No upcoming calendar events are scheduled for the rest of this school week.";
     daysHost.appendChild(empty);
   }
 
-  if (calendarAccessToken && classroomAccessToken) {
-    status.textContent = items.length === 1 ? "1 event this week" : `${items.length} events this week`;
+  if (calendarAccessToken) {
+    status.textContent = items.length
+      ? `Showing next ${items.length} event${items.length === 1 ? "" : "s"}`
+      : "Calendar is up to date";
   } else {
     status.innerHTML = "";
     const text = document.createElement("span");
@@ -784,20 +764,7 @@ function renderMiniWeekCalendar() {
     status.append(text, button);
   }
 
-  // Keep Classroom visible as its own summary, while Classroom due dates also appear above.
-  if (classroomText) {
-    if (classroomAccessToken) {
-      classroomText.textContent = classroomAssignments.length === 1
-        ? "1 upcoming assignment"
-        : `${classroomAssignments.length} upcoming assignments`;
-    } else {
-      classroomText.textContent = "Connect to load assignments";
-    }
-  }
-  if (classroomLink) {
-    classroomLink.dataset.classroomLoaded = classroomAccessToken ? "true" : "false";
-  }
-  wireClassroomLinks();
+  renderLogoAssignmentHover();
 }
 
 function updateWeeklyScheduleLabels() {
@@ -812,6 +779,7 @@ function updateWeeklyScheduleLabels() {
   }
 
   renderMiniWeekCalendar();
+  renderLogoAssignmentHover();
 }
 
 function showScheduleItemDetails(scheduleItem) {
@@ -824,7 +792,7 @@ function showScheduleItemDetails(scheduleItem) {
   const openLink = modal.querySelector(".branch-calendar-open-google");
   if (!list || !title || !kicker || !openLink) return;
 
-  kicker.textContent = scheduleItem.type === "classroom" ? "Google Classroom" : "Google Calendar";
+  kicker.textContent = "Google Calendar";
   title.textContent = scheduleItem.title || "Event Details";
   list.innerHTML = "";
 
@@ -894,7 +862,7 @@ function showWeekdayCalendarEvents() {
   list.innerHTML = "";
 
   if (!weekItems.length) {
-    list.innerHTML = '<div class="branch-calendar-empty">No calendar events or Classroom due dates are scheduled Monday through Friday this week.</div>';
+    list.innerHTML = '<div class="branch-calendar-empty">No calendar events are scheduled Monday through Friday this week.</div>';
   } else {
     weekItems.forEach(scheduleItem => {
       const item = document.createElement(scheduleItem.url ? "a" : "div");
@@ -1107,94 +1075,85 @@ function renderLogoAssignmentHover(failed = false) {
 
   list.innerHTML = "";
 
-  if (subtitle) {
-    if (failed) {
-      subtitle.textContent = "Google Classroom unavailable";
-    } else if (classroomAccessToken) {
-      subtitle.textContent = classroomAssignments.length === 1
-        ? "1 upcoming assignment"
-        : `${classroomAssignments.length} upcoming assignments`;
-    } else {
-      subtitle.textContent = "Google Classroom";
-    }
-  }
-
   if (failed) {
+    if (subtitle) subtitle.textContent = "Google Calendar unavailable";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "Assignments could not be loaded right now.";
+    empty.textContent = "Calendar events could not be loaded right now.";
     list.appendChild(empty);
     return;
   }
 
-  if (!classroomAccessToken) {
+  if (!calendarAccessToken) {
+    if (subtitle) subtitle.textContent = "Google Calendar";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "Connect Google Classroom to load assignments.";
+    empty.textContent = "Connect Google Calendar to load your schedule.";
     list.appendChild(empty);
     return;
   }
 
-  if (!classroomAssignments.length) {
+  const now = new Date();
+  const upcoming = getWeekScheduleItems()
+    .filter(item => item.type === "calendar" && item.sortDate && item.sortDate >= now)
+    .slice(0, 20);
+
+  if (subtitle) {
+    subtitle.textContent = upcoming.length === 1
+      ? "1 upcoming calendar event"
+      : `${upcoming.length} upcoming calendar events`;
+  }
+
+  if (!upcoming.length) {
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "No upcoming assignments. You're all caught up!";
+    empty.textContent = "No more calendar events are scheduled this week.";
     list.appendChild(empty);
     return;
   }
 
-  classroomAssignments.forEach(item => {
+  upcoming.forEach(item => {
     const link = document.createElement("a");
     link.className = "branch-assignment-hover-item";
-    link.href = item.alternateLink || "https://classroom.google.com/";
+    link.href = item.url || "https://calendar.google.com/calendar/u/0/r/agenda";
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.title = `${item.title || "Untitled assignment"} • ${formatClassroomDueDate(item)}`;
+    link.title = `${item.title || "Untitled event"} • ${item.dateText || ""} ${item.timeText || ""}`.trim();
 
     const main = document.createElement("div");
     main.className = "branch-assignment-hover-main";
 
     const name = document.createElement("span");
     name.className = "branch-assignment-hover-name";
-    name.textContent = item.title || "Untitled assignment";
+    name.textContent = item.title || "Untitled event";
 
-    const course = document.createElement("span");
-    course.className = "branch-assignment-hover-course";
-    course.textContent = item.courseName || "Google Classroom";
+    const source = document.createElement("span");
+    source.className = "branch-assignment-hover-course";
+    source.textContent = item.sourceText || "Google Calendar";
 
-    const due = document.createElement("span");
-    due.className = "branch-assignment-hover-due";
+    const when = document.createElement("span");
+    when.className = "branch-assignment-hover-due";
+    const eventDate = item.sortDate;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+    const dayDiff = Math.round((eventDay - today) / 86400000);
 
-    const dueDate = classroomDueDateToDate(item);
-    if (dueDate) {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-      const dayDiff = Math.round((dueDay - today) / 86400000);
-
-      if (dayDiff === 0) {
-        due.classList.add("today");
-        due.textContent = "DUE TODAY";
-      } else if (dayDiff === 1) {
-        due.classList.add("tomorrow");
-        due.textContent = "DUE TOMORROW";
-      } else {
-        due.textContent = dueDate.toLocaleDateString([], {
-          weekday: "short",
-          month: "short",
-          day: "numeric"
-        }).toUpperCase();
-      }
+    if (dayDiff === 0) {
+      when.classList.add("today");
+      when.textContent = item.timeText === "All day" ? "TODAY" : item.timeText;
+    } else if (dayDiff === 1) {
+      when.classList.add("tomorrow");
+      when.textContent = item.timeText === "All day" ? "TOMORROW" : `TOMORROW • ${item.timeText}`;
     } else {
-      due.textContent = "NO DUE DATE";
+      const day = eventDate.toLocaleDateString([], { weekday: "short" }).toUpperCase();
+      when.textContent = item.timeText === "All day" ? day : `${day} • ${item.timeText}`;
     }
 
-    main.append(name, course);
-    link.append(main, due);
+    main.append(name, source);
+    link.append(main, when);
     list.appendChild(link);
   });
 }
-
 
 function ensureClassroomModal() {
   let modal = document.getElementById("branchClassroomModal");
@@ -1448,7 +1407,6 @@ function wireCalendarButton() {
 
 initializeCalendarAuth();
 wireCalendarButton();
-wireClassroomLinks();
 renderMiniWeekCalendar();
 renderLogoAssignmentHover();
 
