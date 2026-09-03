@@ -507,6 +507,32 @@
     }
   </style>
 
+
+  <style>
+    /* TRUE XL center circle: the limiting element is .badge-stage in styles.css */
+    .hero .badge-stage{
+      width:500px !important;
+      height:500px !important;
+      min-width:500px !important;
+      min-height:500px !important;
+      max-width:none !important;
+      aspect-ratio:1 / 1 !important;
+    }
+    .hero .badge-stage .logo-shell{
+      width:500px !important;
+      height:500px !important;
+    }
+    .hero .badge-stage .coded-center-logo{
+      width:100% !important;
+      height:100% !important;
+    }
+
+    /* Keep hover overlay sized to the enlarged circle */
+    .hero .badge-stage #branchAssignmentHover{
+      inset:3% !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
