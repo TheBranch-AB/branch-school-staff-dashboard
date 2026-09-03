@@ -29,6 +29,68 @@
 .badge-stage .logo-shell{padding:0!important;overflow:hidden!important;border-radius:50%!important}
 .badge-stage .portal-badge{width:100%!important;height:100%!important;max-width:none!important;border-radius:50%!important;object-fit:cover!important;object-position:center!important;position:static!important;left:auto!important;top:auto!important;transform:none!important}
 </style>
+
+  <style>
+    /* Coded center logo: no separate image asset required. */
+    .badge-stage .logo-shell{
+      padding:0 !important;
+      overflow:hidden !important;
+      border-radius:50% !important;
+      background:radial-gradient(circle at 50% 38%, #173f5c 0%, #102f48 58%, #0c263b 100%) !important;
+      border:5px solid #fff !important;
+      box-shadow:
+        0 0 0 4px #8ea38d,
+        0 0 0 7px #f4f1ea,
+        0 16px 38px rgba(18,43,63,.16) !important;
+    }
+    .coded-center-logo{
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:14% 10% 12%;
+      text-align:center;
+      color:white;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,255,255,.035), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.06));
+    }
+    .center-branch-mark{
+      width:43%;
+      height:auto;
+      margin-bottom:4%;
+      overflow:visible;
+    }
+    .center-branch-mark path{
+      fill:none;
+      stroke:#b8c86a;
+      stroke-width:4.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .center-school-name{
+      font-family:"Segoe UI",Arial,sans-serif;
+      font-size:clamp(18px,2vw,31px);
+      font-weight:300;
+      letter-spacing:.01em;
+      line-height:1.05;
+      color:#9a6aa1;
+      white-space:nowrap;
+    }
+    .center-motto{
+      margin-top:6%;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(12px,1.25vw,20px);
+      font-weight:500;
+      letter-spacing:.075em;
+      color:#c1cf68;
+      white-space:nowrap;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -99,7 +161,22 @@
 
       <div class="badge-stage" tabindex="0">
         <div class="logo-shell">
-          <img src="assets/staff-center-leaves.jpeg" class="portal-badge" alt="The Branch School Staff Dashboard">
+          
+          <div class="coded-center-logo" aria-label="The Branch School — Where Love Leads">
+            <svg class="center-branch-mark" viewBox="0 0 160 150" aria-hidden="true">
+              <path d="M80 132 C78 105,79 80,80 55 C81 35,80 20,78 10" />
+              <path d="M79 70 C65 57,55 48,42 40" />
+              <path d="M80 58 C95 47,106 35,114 20" />
+              <path d="M61 55 C55 43,52 32,50 22" />
+              <path d="M97 44 C105 35,111 28,120 21" />
+              <path d="M44 41 C38 34,35 27,33 18" />
+              <path d="M114 20 C124 18,132 13,139 7" />
+              <path d="M50 22 C44 16,41 10,39 4" />
+              <path d="M120 21 C124 14,127 8,128 2" />
+            </svg>
+            <div class="center-school-name">The Branch School</div>
+            <div class="center-motto">WHERE LOVE LEADS</div>
+          </div>
         </div>
 
         <div id="branchAssignmentHover" aria-live="polite">
