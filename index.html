@@ -533,6 +533,47 @@
     }
   </style>
 
+
+  <style>
+    /* Inbox: fit card height and make unread messages scrollable */
+    .branch-inbox-card{
+      max-height:320px !important;
+      overflow:hidden !important;
+      display:flex !important;
+      flex-direction:column !important;
+    }
+    .branch-inbox-heading{
+      flex:0 0 auto !important;
+    }
+    .branch-inbox-messages{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      max-height:210px !important;
+      overflow-y:auto !important;
+      overflow-x:hidden !important;
+      padding-right:4px !important;
+      scrollbar-width:thin;
+    }
+    .branch-inbox-message{
+      min-height:auto !important;
+      padding:10px 11px !important;
+    }
+    .branch-inbox-message-top{
+      gap:10px !important;
+    }
+    .branch-inbox-message-top strong{
+      max-width:70% !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+      white-space:nowrap !important;
+    }
+    .branch-inbox-subject{
+      white-space:nowrap !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
