@@ -330,6 +330,11 @@
     }
   </style>
 
+  <style>
+    .left-rail .announcements-card{margin-top:16px;padding:16px 18px}
+    .left-rail .announcements-list{margin-top:8px}
+    .left-rail .announcement-status{font-size:11px;line-height:1.35}
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -381,6 +386,15 @@
         </div>
       </section>
 
+      <section class="card announcements-card" id="announcementsCard">
+        <div class="panel-title-row">
+          <div class="card-title">ANNOUNCEMENTS</div>
+          <span class="live-dot">LIVE</span>
+        </div>
+        <div id="announcementsList" class="announcements-list">
+          <div class="announcement-status">Checking for announcements…</div>
+        </div>
+      </section>
     </section>
 
     <section class="hero">
@@ -443,16 +457,6 @@
         </div>
         <div id="branchInboxMessages" class="branch-inbox-messages">
           <div class="branch-inbox-empty">Connect Microsoft 365 to see your inbox.</div>
-        </div>
-      </section>
-
-      <section class="card announcements-card" id="announcementsCard">
-        <div class="panel-title-row">
-          <div class="card-title">ANNOUNCEMENTS</div>
-          <span class="live-dot">LIVE</span>
-        </div>
-        <div id="announcementsList" class="announcements-list">
-          <div class="announcement-status">Checking for announcements…</div>
         </div>
       </section>
 <section class="resources card compact-resources">
