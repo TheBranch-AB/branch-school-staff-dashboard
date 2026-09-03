@@ -320,6 +320,16 @@ let classroomAccessToken = "";
 let weekCalendarEvents = [];
 let classroomAssignments = [];
 
+// Microsoft 365 / Exchange data
+let microsoftCalendarEvents = [];
+let microsoftAccount = null;
+let microsoftMsal = null;
+let microsoftCalendarConnected = false;
+
+const MICROSOFT_CLIENT_ID = "4b456154-31d4-458f-bbc0-6766a4bbe261";
+const MICROSOFT_TENANT_ID = "23de8575-2ca3-466e-99d9-b4d6eebcfa41";
+const MICROSOFT_SCOPES = ["User.Read", "Calendars.Read", "Mail.Read"];
+
 const GOOGLE_DATA_SESSION_KEY = "branchStaffDashboardGoogleDataToken";
 const GOOGLE_DATA_LOCAL_KEY = "branchStaffDashboardGoogleDataTokenPersistent";
 let automaticGoogleDataAttempted = false;
@@ -587,6 +597,35 @@ function getWeekScheduleItems() {
     };
   });
 
+  const microsoftItems = microsoftCalendarEvents.map(event => {
+    const rawStart = event?.start?.dateTime || "";
+    const startDate = rawStart ? new Date(rawStart) : null;
+    const isAllDay = Boolean(event?.isAllDay);
+
+    let timeText = "Time not available";
+    if (isAllDay) {
+      timeText = "All day";
+    } else if (startDate && !Number.isNaN(startDate.getTime())) {
+      timeText = startDate.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    }
+
+    return {
+      type: "calendar",
+      sortDate: startDate,
+      title: event?.subject || "Untitled event",
+      dateText: !startDate || Number.isNaN(startDate.getTime()) ? "" : startDate.toLocaleDateString([], {
+        weekday: "long", month: "short", day: "numeric"
+      }),
+      timeText,
+      sourceText: "Outlook",
+      details: [
+        event?.location?.displayName,
+        event?.bodyPreview
+      ].filter(Boolean).join("\n"),
+      url: event?.webLink || "https://outlook.office.com/calendar/"
+    };
+  }).filter(item => item.sortDate && !Number.isNaN(item.sortDate.getTime()));
+
   const classroomItems = classroomAssignments
     .map(work => ({ work, due: classroomDueDateToDate(work) }))
     .filter(item => item.due && item.due >= start && item.due < end)
@@ -618,7 +657,7 @@ function getWeekScheduleItems() {
   });
 
   const seen = new Set();
-  return [...classroomItems, ...filteredCalendarItems]
+  return [...classroomItems, ...filteredCalendarItems, ...microsoftItems]
     .filter(item => {
       const dayKey = !item.sortDate || Number.isNaN(item.sortDate.getTime())
         ? ""
@@ -741,14 +780,14 @@ function renderMiniWeekCalendar() {
     daysHost.appendChild(row);
   });
 
-  if (!items.length && calendarAccessToken) {
+  if (!items.length && (calendarAccessToken || microsoftCalendarConnected)) {
     const empty = document.createElement("div");
     empty.className = "branch-miniweek-noitems";
     empty.textContent = "No upcoming calendar events are scheduled for the rest of this school week.";
     daysHost.appendChild(empty);
   }
 
-  if (calendarAccessToken) {
+  if (calendarAccessToken || microsoftCalendarConnected) {
     status.textContent = items.length
       ? `Showing next ${items.length} event${items.length === 1 ? "" : "s"}`
       : "Calendar is up to date";
@@ -1084,11 +1123,11 @@ function renderLogoAssignmentHover(failed = false) {
     return;
   }
 
-  if (!calendarAccessToken) {
-    if (subtitle) subtitle.textContent = "Google Calendar";
+  if (!calendarAccessToken && !microsoftCalendarConnected) {
+    if (subtitle) subtitle.textContent = "Outlook + School Calendar";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "Connect Google Calendar to load your schedule.";
+    empty.textContent = "Connect Microsoft 365 or Google Calendar to load your schedule.";
     list.appendChild(empty);
     return;
   }
@@ -1423,6 +1462,275 @@ function updateDailyQuote(){
   quote.innerHTML = `“${item.text}”<small>— ${item.author}</small>`;
 }
 updateDailyQuote();
+
+
+
+/* ===== Microsoft 365 / Exchange integration =====
+   Delegated, read-only access:
+   User.Read + Calendars.Read + Mail.Read
+*/
+async function initializeMicrosoft365() {
+  const button = document.getElementById("branchMicrosoftConnect");
+  const status = document.getElementById("branchMicrosoftStatus");
+
+  if (!window.msal?.PublicClientApplication) {
+    if (status) status.textContent = "Microsoft sign-in is loading…";
+    setTimeout(initializeMicrosoft365, 300);
+    return;
+  }
+
+  try {
+    microsoftMsal = new msal.PublicClientApplication({
+      auth: {
+        clientId: MICROSOFT_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}`,
+        redirectUri: "https://thebranch-ab.github.io/branch-school-staff-dashboard/"
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false
+      }
+    });
+
+    if (typeof microsoftMsal.initialize === "function") {
+      await microsoftMsal.initialize();
+    }
+
+    try {
+      await microsoftMsal.handleRedirectPromise();
+    } catch (error) {
+      console.warn("Microsoft redirect handling:", error);
+    }
+
+    const accounts = microsoftMsal.getAllAccounts();
+    if (accounts.length) {
+      microsoftAccount = accounts[0];
+      microsoftMsal.setActiveAccount?.(microsoftAccount);
+      await loadMicrosoft365Data(false);
+    } else {
+      setMicrosoftStatus("Connect your Exchange calendar and inbox.");
+    }
+
+    if (button) {
+      button.addEventListener("click", async () => {
+        try {
+          button.disabled = true;
+          button.textContent = "Connecting…";
+
+          const login = await microsoftMsal.loginPopup({
+            scopes: MICROSOFT_SCOPES,
+            prompt: "select_account"
+          });
+
+          microsoftAccount = login.account;
+          microsoftMsal.setActiveAccount?.(microsoftAccount);
+          await loadMicrosoft365Data(true);
+        } catch (error) {
+          console.error("Microsoft sign-in failed:", error);
+          setMicrosoftStatus("Microsoft sign-in was not completed.");
+        } finally {
+          button.disabled = false;
+          updateMicrosoftButton();
+        }
+      });
+    }
+
+    updateMicrosoftButton();
+  } catch (error) {
+    console.error("Could not initialize Microsoft 365:", error);
+    setMicrosoftStatus("Microsoft 365 connection unavailable.");
+  }
+}
+
+function setMicrosoftStatus(text) {
+  const status = document.getElementById("branchMicrosoftStatus");
+  if (status) status.textContent = text;
+}
+
+function updateMicrosoftButton() {
+  const button = document.getElementById("branchMicrosoftConnect");
+  if (!button) return;
+  button.textContent = microsoftAccount ? "Microsoft 365 Connected ✓" : "Connect Microsoft 365";
+  button.classList.toggle("is-connected", Boolean(microsoftAccount));
+}
+
+async function getMicrosoftAccessToken(interactive = false) {
+  if (!microsoftMsal) throw new Error("Microsoft authentication is not initialized.");
+
+  microsoftAccount =
+    microsoftMsal.getActiveAccount?.() ||
+    microsoftAccount ||
+    microsoftMsal.getAllAccounts()[0] ||
+    null;
+
+  if (!microsoftAccount) {
+    if (!interactive) return "";
+    const login = await microsoftMsal.loginPopup({ scopes: MICROSOFT_SCOPES });
+    microsoftAccount = login.account;
+    microsoftMsal.setActiveAccount?.(microsoftAccount);
+  }
+
+  try {
+    const token = await microsoftMsal.acquireTokenSilent({
+      scopes: MICROSOFT_SCOPES,
+      account: microsoftAccount
+    });
+    return token.accessToken || "";
+  } catch (error) {
+    if (!interactive) {
+      console.warn("Silent Microsoft token acquisition needs interaction:", error);
+      return "";
+    }
+    const token = await microsoftMsal.acquireTokenPopup({
+      scopes: MICROSOFT_SCOPES,
+      account: microsoftAccount
+    });
+    return token.accessToken || "";
+  }
+}
+
+async function graphGet(path, token) {
+  const response = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      Prefer: 'outlook.timezone="Central Standard Time"'
+    }
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Microsoft Graph ${response.status}: ${message}`);
+  }
+  return response.json();
+}
+
+async function loadMicrosoft365Data(interactive = false) {
+  const token = await getMicrosoftAccessToken(interactive);
+  if (!token) {
+    setMicrosoftStatus("Click Connect Microsoft 365 to load Exchange.");
+    updateMicrosoftButton();
+    return;
+  }
+
+  setMicrosoftStatus("Loading Exchange calendar and inbox…");
+
+  const now = new Date();
+  const end = new Date(now);
+  end.setDate(end.getDate() + 45);
+
+  const startIso = encodeURIComponent(now.toISOString());
+  const endIso = encodeURIComponent(end.toISOString());
+
+  const profilePath = "/me?$select=displayName,mail,userPrincipalName";
+  const calendarPath =
+    `/me/calendarView?startDateTime=${startIso}&endDateTime=${endIso}` +
+    "&$select=subject,start,end,location,bodyPreview,webLink,isAllDay" +
+    "&$orderby=start/dateTime&$top=50";
+  const inboxPath = "/me/mailFolders/inbox?$select=unreadItemCount,totalItemCount";
+  const messagesPath =
+    "/me/mailFolders/inbox/messages" +
+    "?$select=subject,from,receivedDateTime,webLink,isRead" +
+    "&$orderby=receivedDateTime%20desc&$top=3";
+
+  try {
+    const [profile, calendar, inbox, messages] = await Promise.all([
+      graphGet(profilePath, token),
+      graphGet(calendarPath, token),
+      graphGet(inboxPath, token),
+      graphGet(messagesPath, token)
+    ]);
+
+    microsoftCalendarEvents = Array.isArray(calendar?.value) ? calendar.value : [];
+    microsoftCalendarConnected = true;
+
+    const email = profile?.mail || profile?.userPrincipalName || microsoftAccount?.username || "";
+    const name = profile?.displayName || microsoftAccount?.name || "Staff Member";
+
+    if (email) {
+      setStudentInfo(name, email);
+      saveSignedInUser(name, email);
+      const accountStatus = document.getElementById("accountStatus");
+      if (accountStatus) accountStatus.textContent = "Microsoft 365 connected";
+    }
+
+    renderMicrosoftInbox(inbox, messages?.value || []);
+    setMicrosoftStatus("Exchange calendar + inbox connected.");
+    updateMicrosoftButton();
+
+    renderMiniWeekCalendar();
+    renderLogoAssignmentHover();
+    updateWeeklyScheduleLabels();
+  } catch (error) {
+    console.error("Microsoft 365 data load failed:", error);
+    setMicrosoftStatus("Could not load Exchange data.");
+    renderMicrosoftInbox(null, [], true);
+  }
+}
+
+function renderMicrosoftInbox(inbox, messages, failed = false) {
+  const countEl = document.getElementById("branchInboxUnread");
+  const listEl = document.getElementById("branchInboxMessages");
+  const openEl = document.getElementById("branchInboxOpen");
+
+  if (openEl) openEl.href = "https://outlook.office.com/mail/";
+
+  if (!countEl || !listEl) return;
+
+  if (failed) {
+    countEl.textContent = "—";
+    listEl.innerHTML = '<div class="branch-inbox-empty">Inbox unavailable right now.</div>';
+    return;
+  }
+
+  if (!microsoftCalendarConnected) {
+    countEl.textContent = "—";
+    listEl.innerHTML = '<div class="branch-inbox-empty">Connect Microsoft 365 to see your inbox.</div>';
+    return;
+  }
+
+  const unread = Number(inbox?.unreadItemCount || 0);
+  countEl.textContent = unread.toLocaleString();
+
+  listEl.innerHTML = "";
+  if (!messages.length) {
+    listEl.innerHTML = '<div class="branch-inbox-empty">No recent inbox messages.</div>';
+    return;
+  }
+
+  messages.forEach(message => {
+    const link = document.createElement("a");
+    link.className = `branch-inbox-message${message?.isRead === false ? " is-unread" : ""}`;
+    link.href = message?.webLink || "https://outlook.office.com/mail/";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    const sender =
+      message?.from?.emailAddress?.name ||
+      message?.from?.emailAddress?.address ||
+      "Sender";
+
+    const received = message?.receivedDateTime
+      ? new Date(message.receivedDateTime).toLocaleString([], {
+          month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
+        })
+      : "";
+
+    link.innerHTML = `
+      <div class="branch-inbox-message-top">
+        <strong></strong><span></span>
+      </div>
+      <div class="branch-inbox-subject"></div>`;
+
+    link.querySelector("strong").textContent = sender;
+    link.querySelector(".branch-inbox-message-top span").textContent = received;
+    link.querySelector(".branch-inbox-subject").textContent = message?.subject || "(No subject)";
+    listEl.appendChild(link);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initializeMicrosoft365);
+if (document.readyState !== "loading") initializeMicrosoft365();
 
 
 /* ===== Keep the Branch School Dashboard open =====
