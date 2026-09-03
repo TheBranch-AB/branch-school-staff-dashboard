@@ -179,6 +179,35 @@
     .branch-inbox-empty{padding:9px 0;color:#7b858c;font-size:11px}
   </style>
 
+
+  <style>
+    .header-account-panel{
+      display:flex;align-items:center;gap:10px;min-width:460px;justify-content:flex-end;
+    }
+    .header-account-avatar{
+      width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+      background:linear-gradient(135deg,#28485f,#789080);color:#fff;font-weight:900;flex:0 0 auto;
+    }
+    .header-account-copy{display:flex;flex-direction:column;min-width:170px;max-width:220px;line-height:1.15}
+    .header-account-copy strong{color:#fff;font-size:12px}
+    .header-account-copy span{color:#d8e2e7;font-size:10px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .header-account-copy #accountStatus{color:#c4d79d;font-weight:700}
+    .header-account-actions{display:flex;gap:7px}
+    .header-account-btn{
+      border:1px solid rgba(255,255,255,.28);border-radius:8px;padding:8px 10px;
+      font-size:10px;font-weight:900;cursor:pointer;background:rgba(255,255,255,.08);
+      color:#fff;white-space:nowrap;
+    }
+    .header-account-btn:hover{background:rgba(255,255,255,.16)}
+    .header-account-btn.is-connected{background:#edf4ea;border-color:#b6c7a9;color:#294835}
+    .header-account-btn.google.is-connected{background:#fff;color:#334155;border-color:#d8dde3}
+    .dashboard{align-items:start}
+    @media (max-width:1100px){
+      .header-account-panel{min-width:0;max-width:100%}
+      .header-account-copy{display:none}
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -191,57 +220,14 @@
     </div>
 
     <div class="topbar-right">
-      <div class="staff-mini">
-        <div class="staff-mini-icon">♙</div>
-        <div>
-          <strong>STAFF INFO</strong>
-          <span id="topStaffHint">Sign in with your @thebranchschool.org account</span>
+      <div class="header-account-panel">
+        <div class="header-account-avatar" id="avatar">S</div>
+        <div class="header-account-copy">
+          <strong id="studentName">Staff Member</strong>
+          <span id="studentEmail">Sign in to Microsoft or Google</span>
+          <span id="accountStatus">Not connected</span>
         </div>
-      </div>
-      <div class="top-clock">
-        <strong id="clock">--:--</strong>
-        <span id="date">Today</span>
-      </div>
-    </div>
-  </header>
-
-  <main class="dashboard">
-    <section class="left-rail">
-      <section class="card today-card">
-        <div class="card-title"><span>▣</span>TODAY</div>
-        <div class="today-date" id="todayDateMirror">Loading date…</div>
-        <div class="today-copy">Your calendar and school resources, all in one place.</div>
-      </section>
-
-      <section class="card quick-card">
-        <div class="card-title"><span>↗</span>QUICK LINKS</div>
-        <div class="quick-list">
-          <a href="https://factsmgt.com/"><img src="https://www.google.com/s2/favicons?domain=factsmgt.com&sz=64"><span>FACTS (RenWeb)</span><b>›</b></a>
-          <a href="https://drive.google.com/"><img src="https://www.google.com/s2/favicons?domain=drive.google.com&sz=64"><span>Google Drive</span><b>›</b></a>
-          <a href="https://mail.google.com/"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=64"><span>Gmail</span><b>›</b></a>
-          <a href="https://calendar.google.com/"><img src="https://www.google.com/s2/favicons?domain=calendar.google.com&sz=64"><span>Google Calendar</span><b>›</b></a>
-          <a href="https://docs.google.com/forms/"><img src="https://www.google.com/s2/favicons?domain=forms.google.com&sz=64"><span>Google Forms</span><b>›</b></a>
-          <a href="https://classroom.google.com/"><img src="https://www.google.com/s2/favicons?domain=classroom.google.com&sz=64"><span>Google Classroom</span><b>›</b></a>
-        </div>
-      </section>
-
-      <section class="card staff-card">
-        <div class="card-title"><span>ⓘ</span>STAFF ACCOUNT</div>
-        <div class="staff-main">
-          <div class="avatar" id="avatar">S</div>
-          <div class="staff-ident">
-            <h3 id="studentName">Staff Member</h3>
-            <span id="studentEmail">Signed in to Chrome</span>
-            <small>The Branch School</small>
-          </div>
-        </div>
-        <div class="staff-status">
-          <span>School account</span>
-          <b id="accountStatus">Checking…</b>
-        </div>
-        <a class="schedule-btn" href="https://outlook.office.com/calendar/view/day">View My Calendar ›</a>
-        <button type="button" id="branchMicrosoftConnect" class="microsoft-connect-btn">Connect Microsoft 365</button>
-        <div id="branchMicrosoftStatus" class="microsoft-connect-status">Connect your Exchange calendar and inbox.</div>
+        <div class="header-account-actions">
       </section>
     </section>
 
@@ -353,7 +339,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260903-microsoft-v1"></script>
+  <script src="app.js?v=20260903-header-account-v1"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
@@ -363,16 +349,6 @@
     };
     setInterval(mirrorDate, 500);
     mirrorDate();
-
-    // Mirror signed-in staff text into the top bar.
-    const mirrorStaff = () => {
-      const email = document.getElementById("studentEmail");
-      const hint = document.getElementById("topStaffHint");
-      if (email && hint && email.textContent && !/signed in to chrome/i.test(email.textContent)) {
-        hint.textContent = email.textContent;
-      }
-    };
-    setInterval(mirrorStaff, 800);
-  </script>
+</script>
 </body>
 </html>
