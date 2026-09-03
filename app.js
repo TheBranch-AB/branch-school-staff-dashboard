@@ -435,6 +435,7 @@ function initializeCalendarAuth() {
       ]);
       renderMiniWeekCalendar();
       renderLogoAssignmentHover();
+      updateGoogleHeaderButton();
     }
   });
 
@@ -1465,6 +1466,51 @@ updateDailyQuote();
 
 
 
+
+function updateGoogleHeaderButton() {
+  const button = document.getElementById("branchGoogleConnect");
+  if (!button) return;
+  if (calendarAccessToken) {
+    button.textContent = "Google Connected ✓";
+    button.classList.add("is-connected");
+  } else if (hasSavedBranchPortalUser()) {
+    button.textContent = "Connect Google";
+    button.classList.remove("is-connected");
+  } else {
+    button.textContent = "Sign in with Google";
+    button.classList.remove("is-connected");
+  }
+}
+
+function initializeGoogleHeaderButton() {
+  const button = document.getElementById("branchGoogleConnect");
+  if (!button || button.dataset.branchGoogleReady === "true") return;
+  button.dataset.branchGoogleReady = "true";
+
+  button.addEventListener("click", () => {
+    if (calendarAccessToken) return updateGoogleHeaderButton();
+
+    if (calendarTokenClient) {
+      try {
+        calendarTokenClient.requestAccessToken({ prompt: "" });
+        return;
+      } catch (error) {
+        console.warn("Google calendar connection needs interaction:", error);
+      }
+    }
+
+    if (window.google?.accounts?.id) {
+      try { google.accounts.id.prompt(); }
+      catch (error) { console.error("Google sign-in prompt failed:", error); }
+    }
+  });
+
+  updateGoogleHeaderButton();
+}
+
+document.addEventListener("DOMContentLoaded", initializeGoogleHeaderButton);
+if (document.readyState !== "loading") initializeGoogleHeaderButton();
+
 /* ===== Microsoft 365 / Exchange integration =====
    Delegated, read-only access:
    User.Read + Calendars.Read + Mail.Read
@@ -1550,7 +1596,7 @@ function setMicrosoftStatus(text) {
 function updateMicrosoftButton() {
   const button = document.getElementById("branchMicrosoftConnect");
   if (!button) return;
-  button.textContent = microsoftAccount ? "Microsoft 365 Connected ✓" : "Connect Microsoft 365";
+  button.textContent = microsoftAccount ? "Microsoft Connected ✓" : "Microsoft 365";
   button.classList.toggle("is-connected", Boolean(microsoftAccount));
 }
 
