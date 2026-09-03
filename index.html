@@ -182,28 +182,68 @@
 
   <style>
     .header-account-panel{
-      display:flex;align-items:center;gap:10px;min-width:460px;justify-content:flex-end;
+      display:flex;
+      align-items:center;
+      gap:10px;
     }
     .header-account-avatar{
-      width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
-      background:linear-gradient(135deg,#28485f,#789080);color:#fff;font-weight:900;flex:0 0 auto;
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+      background:linear-gradient(135deg,#28485f,#789080);
+      color:#fff;
+      font-weight:900;
     }
-    .header-account-copy{display:flex;flex-direction:column;min-width:170px;max-width:220px;line-height:1.15}
+    .header-account-copy{
+      display:flex;
+      flex-direction:column;
+      width:185px;
+      line-height:1.15;
+    }
     .header-account-copy strong{color:#fff;font-size:12px}
-    .header-account-copy span{color:#d8e2e7;font-size:10px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .header-account-copy #accountStatus{color:#c4d79d;font-weight:700}
-    .header-account-actions{display:flex;gap:7px}
+    .header-account-copy span{
+      color:#d8e2e7;
+      font-size:9px;
+      margin-top:2px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .header-account-copy #accountStatus{
+      color:#c8d99c;
+      font-weight:800;
+    }
+    .header-account-actions{
+      display:flex;
+      gap:6px;
+    }
     .header-account-btn{
-      border:1px solid rgba(255,255,255,.28);border-radius:8px;padding:8px 10px;
-      font-size:10px;font-weight:900;cursor:pointer;background:rgba(255,255,255,.08);
-      color:#fff;white-space:nowrap;
+      border:1px solid rgba(255,255,255,.30);
+      border-radius:8px;
+      padding:7px 9px;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      font-size:9px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
     }
     .header-account-btn:hover{background:rgba(255,255,255,.16)}
-    .header-account-btn.is-connected{background:#edf4ea;border-color:#b6c7a9;color:#294835}
-    .header-account-btn.google.is-connected{background:#fff;color:#334155;border-color:#d8dde3}
-    .dashboard{align-items:start}
-    @media (max-width:1100px){
-      .header-account-panel{min-width:0;max-width:100%}
+    .header-account-btn.is-connected{
+      background:#edf4ea;
+      border-color:#b5c8aa;
+      color:#294835;
+    }
+
+    /* Keep the dashboard on one screen now that the duplicate agenda is gone. */
+    .right-rail{
+      align-self:start;
+    }
+
+    @media (max-width:1180px){
       .header-account-copy{display:none}
     }
   </style>
@@ -224,11 +264,41 @@
         <div class="header-account-avatar" id="avatar">S</div>
         <div class="header-account-copy">
           <strong id="studentName">Staff Member</strong>
-          <span id="studentEmail">Sign in to Microsoft or Google</span>
+          <span id="studentEmail">Sign in with Microsoft or Google</span>
           <span id="accountStatus">Not connected</span>
         </div>
         <div class="header-account-actions">
+          <button type="button" id="branchMicrosoftConnect" class="header-account-btn">Microsoft 365</button>
+          <button type="button" id="branchGoogleConnect" class="header-account-btn">Google</button>
+        </div>
+      </div>
+      <div class="top-clock">
+        <strong id="clock">--:--</strong>
+        <span id="date">Today</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <section class="left-rail">
+      <section class="card today-card">
+        <div class="card-title"><span>▣</span>TODAY</div>
+        <div class="today-date" id="todayDateMirror">Loading date…</div>
+        <div class="today-copy">Your calendar and school resources, all in one place.</div>
       </section>
+
+      <section class="card quick-card">
+        <div class="card-title"><span>↗</span>QUICK LINKS</div>
+        <div class="quick-list">
+          <a href="https://factsmgt.com/"><img src="https://www.google.com/s2/favicons?domain=factsmgt.com&sz=64"><span>FACTS (RenWeb)</span><b>›</b></a>
+          <a href="https://drive.google.com/"><img src="https://www.google.com/s2/favicons?domain=drive.google.com&sz=64"><span>Google Drive</span><b>›</b></a>
+          <a href="https://mail.google.com/"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=64"><span>Gmail</span><b>›</b></a>
+          <a href="https://calendar.google.com/"><img src="https://www.google.com/s2/favicons?domain=calendar.google.com&sz=64"><span>Google Calendar</span><b>›</b></a>
+          <a href="https://docs.google.com/forms/"><img src="https://www.google.com/s2/favicons?domain=forms.google.com&sz=64"><span>Google Forms</span><b>›</b></a>
+          <a href="https://classroom.google.com/"><img src="https://www.google.com/s2/favicons?domain=classroom.google.com&sz=64"><span>Google Classroom</span><b>›</b></a>
+        </div>
+      </section>
+
     </section>
 
     <section class="hero">
@@ -281,19 +351,6 @@
     </section>
 
     <aside class="right-rail">
-      <section class="card agenda-card weekly-agenda" id="weeklyAgendaPanel">
-        <div id="branchMiniWeek">
-          <div class="branch-miniweek-toolbar">
-            <div class="branch-miniweek-label">▣ &nbsp; TODAY &amp; UPCOMING</div>
-            <a class="branch-miniweek-open" href="https://calendar.google.com/calendar/u/0/r/agenda" target="_blank" rel="noopener noreferrer">View full calendar</a>
-          </div>
-          <div class="branch-miniweek-days" id="branchMiniWeekDays">
-            <div class="branch-miniweek-loading">Loading live calendar…</div>
-          </div>
-          <div class="branch-miniweek-status" id="branchMiniWeekStatus">Loading live schedule…</div>
-        </div>
-      </section>
-
       <section class="card branch-inbox-card" id="branchInboxCard">
         <div class="branch-inbox-heading">
           <div>
@@ -339,7 +396,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260903-header-account-v1"></script>
+  <script src="app.js?v=20260903-header-login-v2"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
@@ -349,6 +406,8 @@
     };
     setInterval(mirrorDate, 500);
     mirrorDate();
-</script>
+
+
+  </script>
 </body>
 </html>
