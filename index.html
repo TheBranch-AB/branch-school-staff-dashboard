@@ -574,6 +574,29 @@
     }
   </style>
 
+
+  <style>
+    .branch-inbox-messages{
+      max-height:205px !important;
+      overflow-y:scroll !important;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-gutter:stable;
+    }
+    .branch-inbox-messages::-webkit-scrollbar{
+      width:10px;
+    }
+    .branch-inbox-messages::-webkit-scrollbar-track{
+      background:#eef1ee;
+      border-radius:10px;
+    }
+    .branch-inbox-messages::-webkit-scrollbar-thumb{
+      background:#8da58b;
+      border-radius:10px;
+      border:2px solid #eef1ee;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -720,7 +743,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260903-header-login-v2"></script>
+  <script src="app.js?v=20260903-unread-scroll-v2"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
