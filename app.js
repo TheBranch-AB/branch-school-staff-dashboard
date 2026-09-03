@@ -1672,7 +1672,8 @@ async function loadMicrosoft365Data(interactive = false) {
   const messagesPath =
     "/me/mailFolders/inbox/messages" +
     "?$select=subject,from,receivedDateTime,webLink,isRead" +
-    "&$orderby=receivedDateTime%20desc&$top=3";
+    "&$filter=isRead%20eq%20false" +
+    "&$orderby=receivedDateTime%20desc&$top=15";
 
   try {
     const [profile, calendar, inbox, messages] = await Promise.all([
