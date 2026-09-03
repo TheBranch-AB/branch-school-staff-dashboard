@@ -91,6 +91,94 @@
     }
   </style>
 
+
+  <style>
+    .microsoft-connect-btn{
+      width:100%;
+      margin-top:10px;
+      border:1px solid #d9e0e5;
+      border-radius:10px;
+      background:#fff;
+      color:#17324a;
+      padding:9px 11px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .microsoft-connect-btn:hover{background:#f4f7f5}
+    .microsoft-connect-btn.is-connected{
+      background:#eef5ee;
+      border-color:#a7bca6;
+      color:#38563d;
+    }
+    .microsoft-connect-status{
+      margin-top:7px;
+      font-size:11px;
+      line-height:1.35;
+      color:#6b7780;
+    }
+    .branch-inbox-card{padding:18px}
+    .branch-inbox-heading{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:12px;
+      border-bottom:1px solid #e6e7e3;
+    }
+    .branch-inbox-heading a{
+      font-size:11px;
+      font-weight:800;
+      color:#345d86;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .branch-inbox-count{
+      margin-top:4px;
+      color:#69757e;
+      font-size:12px;
+    }
+    .branch-inbox-count span{
+      color:#17324a;
+      font-size:22px;
+      font-weight:900;
+      margin-right:3px;
+    }
+    .branch-inbox-messages{display:grid;gap:8px;margin-top:11px}
+    .branch-inbox-message{
+      display:block;
+      padding:9px 10px;
+      border:1px solid #e5e8e6;
+      border-radius:10px;
+      background:#fbfcfa;
+      color:#17324a;
+      text-decoration:none;
+    }
+    .branch-inbox-message.is-unread{border-left:4px solid #819b7d;background:#f5f8f3}
+    .branch-inbox-message-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-size:10px;
+    }
+    .branch-inbox-message-top strong{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:11px;
+    }
+    .branch-inbox-message-top span{color:#879098;white-space:nowrap}
+    .branch-inbox-subject{
+      margin-top:4px;
+      font-size:11px;
+      line-height:1.3;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .branch-inbox-empty{padding:9px 0;color:#7b858c;font-size:11px}
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -151,7 +239,9 @@
           <span>School account</span>
           <b id="accountStatus">Checking…</b>
         </div>
-        <a class="schedule-btn" href="https://calendar.google.com/calendar/u/0/r/day">View My Calendar ›</a>
+        <a class="schedule-btn" href="https://outlook.office.com/calendar/view/day">View My Calendar ›</a>
+        <button type="button" id="branchMicrosoftConnect" class="microsoft-connect-btn">Connect Microsoft 365</button>
+        <div id="branchMicrosoftStatus" class="microsoft-connect-status">Connect your Exchange calendar and inbox.</div>
       </section>
     </section>
 
@@ -183,7 +273,7 @@
           <div class="branch-assignment-hover-shell">
             <div class="branch-assignment-hover-header">
               <div class="branch-assignment-hover-title">TODAY & UPCOMING</div>
-              <div class="branch-assignment-hover-subtitle" id="branchAssignmentHoverSubtitle">Google Calendar</div>
+              <div class="branch-assignment-hover-subtitle" id="branchAssignmentHoverSubtitle">Outlook + School Calendar</div>
             </div>
             <div id="branchAssignmentHoverList">
               <div class="branch-assignment-hover-empty">Loading calendar…</div>
@@ -218,6 +308,19 @@
         </div>
       </section>
 
+      <section class="card branch-inbox-card" id="branchInboxCard">
+        <div class="branch-inbox-heading">
+          <div>
+            <div class="card-title">OUTLOOK INBOX</div>
+            <div class="branch-inbox-count"><span id="branchInboxUnread">—</span> unread</div>
+          </div>
+          <a id="branchInboxOpen" href="https://outlook.office.com/mail/" target="_blank" rel="noopener noreferrer">Open Outlook ↗</a>
+        </div>
+        <div id="branchInboxMessages" class="branch-inbox-messages">
+          <div class="branch-inbox-empty">Connect Microsoft 365 to see your inbox.</div>
+        </div>
+      </section>
+
       <section class="card announcements-card" id="announcementsCard">
         <div class="panel-title-row">
           <div class="card-title">ANNOUNCEMENTS</div>
@@ -248,8 +351,9 @@
   </footer>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260827-staff-v2"></script>
+  <script src="app.js?v=20260903-microsoft-v1"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
