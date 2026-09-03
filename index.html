@@ -285,6 +285,28 @@
     }
   </style>
 
+
+  <style>
+    /* Staff Resources: compact 4 x 2 layout, supports up to 8 tiles */
+    .compact-resources .resource-row{
+      grid-template-columns:repeat(4, minmax(0,1fr)) !important;
+      gap:6px !important;
+    }
+    .compact-resources .resource-row a{
+      height:62px !important;
+      padding:7px 3px !important;
+      gap:4px !important;
+    }
+    .compact-resources .resource-row img{
+      width:21px !important;
+      height:21px !important;
+    }
+    .compact-resources .resource-row span{
+      font-size:8px !important;
+      line-height:1.05 !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
