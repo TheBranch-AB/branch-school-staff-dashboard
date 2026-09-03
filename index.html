@@ -477,6 +477,36 @@
       max-height:48vw !important;
     }
   </style>
+
+  <style>
+    /* Actually enlarge center logo: override parent sizing constraints too */
+    .hero{
+      overflow:visible !important;
+    }
+    .hero-center,
+    .portal-badge-wrap,
+    .portal-badge-container{
+      width:auto !important;
+      max-width:none !important;
+      overflow:visible !important;
+    }
+    .portal-badge{
+      width:500px !important;
+      height:500px !important;
+      min-width:500px !important;
+      min-height:500px !important;
+      max-width:none !important;
+      max-height:none !important;
+      flex:0 0 500px !important;
+      transform:none !important;
+    }
+    .portal-badge svg,
+    .portal-badge img{
+      width:100% !important;
+      height:100% !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
