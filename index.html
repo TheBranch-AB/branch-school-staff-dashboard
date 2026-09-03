@@ -248,6 +248,43 @@
     }
   </style>
 
+
+  <style>
+    .compact-resources{
+      padding:16px !important;
+      width:100%;
+      box-sizing:border-box;
+    }
+    .compact-resources .resource-row{
+      display:grid !important;
+      grid-template-columns:repeat(3, minmax(0,1fr)) !important;
+      gap:8px !important;
+      margin-top:10px !important;
+    }
+    .compact-resources .resource-row a{
+      min-width:0 !important;
+      padding:10px 5px !important;
+      height:76px !important;
+      border-radius:10px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:6px !important;
+      text-align:center !important;
+    }
+    .compact-resources .resource-row img{
+      width:28px !important;
+      height:28px !important;
+      object-fit:contain !important;
+    }
+    .compact-resources .resource-row span{
+      font-size:9px !important;
+      line-height:1.1 !important;
+      white-space:normal !important;
+    }
+  </style>
+
 </head>
 <body>
   <header class="topbar">
@@ -373,9 +410,7 @@
           <div class="announcement-status">Checking for announcements…</div>
         </div>
       </section>
-    </aside>
-
-    <section class="resources card">
+<section class="resources card compact-resources">
       <div class="card-title"><span>▱</span>STAFF RESOURCES</div>
       <div class="resource-row">
         <a href="https://www.canva.com/"><img src="https://www.google.com/s2/favicons?domain=canva.com&sz=128"><span>Canva</span></a>
@@ -386,7 +421,8 @@
         <a href="https://www.ixl.com/"><img src="https://www.google.com/s2/favicons?domain=ixl.com&sz=128"><span>IXL</span></a>
       </div>
     </section>
-  </main>
+    </aside>
+</main>
 
   <footer>
     <span>Loving to Learn. Learning to Lead. Leading with Love.</span>
