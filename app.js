@@ -327,7 +327,7 @@ let microsoftMsal = null;
 let microsoftCalendarConnected = false;
 
 const MICROSOFT_CLIENT_ID = "4b456154-31d4-458f-bbc0-6766a4bbe261";
-const MICROSOFT_TENANT_ID = "23de8575-2ca3-466e-99d9-b4d6eebcfa41";
+const MICROSOFT_TENANT_ID = "thebranchschool.org";
 const MICROSOFT_SCOPES = ["User.Read", "Calendars.Read", "Mail.Read"];
 
 const GOOGLE_DATA_SESSION_KEY = "branchStaffDashboardGoogleDataToken";
