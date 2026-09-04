@@ -196,6 +196,10 @@
       background:linear-gradient(135deg,#28485f,#789080);
       color:#fff;
       font-weight:900;
+      overflow:hidden;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
     }
     .header-account-copy{
       display:flex;
@@ -743,7 +747,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260903-split-calendars-v1"></script>
+  <script src="app.js?v=20260903-profile-photo-v1"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
