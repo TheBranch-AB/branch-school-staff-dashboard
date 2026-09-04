@@ -763,6 +763,34 @@
   .ase-empty{padding:8px 2px;font-size:12px;color:#677985;}
 </style>
 
+
+<style id="resourceAndQuickLinkTightening">
+  /* Keep Quick Links compact now, but scroll when more links are added. */
+  .quick-links{
+    max-height:220px!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:4px!important;
+  }
+  .quick-links::-webkit-scrollbar{width:6px;}
+  .quick-links::-webkit-scrollbar-thumb{
+    background:rgba(20,48,66,.18);
+    border-radius:10px;
+  }
+
+  /* Staff Resources can grow later without stretching the page. */
+  .right-rail .resource-grid{
+    max-height:250px!important;
+    overflow-y:auto!important;
+    padding-right:4px!important;
+  }
+  .right-rail .resource-grid::-webkit-scrollbar{width:6px;}
+  .right-rail .resource-grid::-webkit-scrollbar-thumb{
+    background:rgba(20,48,66,.18);
+    border-radius:10px;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -806,13 +834,10 @@
       <section class="card quick-card">
         <div class="card-title"><span>↗</span>QUICK LINKS</div>
         <div class="quick-list">
-          <a href="https://factsmgt.com/"><img src="https://www.google.com/s2/favicons?domain=factsmgt.com&sz=64"><span>FACTS (RenWeb)</span><b>›</b></a>
-<a target="_blank" href="assets/phoneextensions.html"><span style="font-size:20px;line-height:1" aria-hidden="true">☎</span><span>Phone Extensions</span><b>›</b></a>
-          <a href="https://drive.google.com/"><img src="https://www.google.com/s2/favicons?domain=drive.google.com&sz=64"><span>Google Drive</span><b>›</b></a>
-          <a href="https://mail.google.com/"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=64"><span>Gmail</span><b>›</b></a>
-          <a href="https://calendar.google.com/"><img src="https://www.google.com/s2/favicons?domain=calendar.google.com&sz=64"><span>Google Calendar</span><b>›</b></a>
-          <a href="https://docs.google.com/forms/"><img src="https://www.google.com/s2/favicons?domain=forms.google.com&sz=64"><span>Google Forms</span><b>›</b></a>
           <a href="https://classroom.google.com/"><img src="https://www.google.com/s2/favicons?domain=classroom.google.com&sz=64"><span>Google Classroom</span><b>›</b></a>
+<a href="https://mail.google.com/"><img src="https://www.google.com/s2/favicons?domain=mail.google.com&sz=64"><span>Gmail</span><b>›</b></a>
+<a href="https://drive.google.com/"><img src="https://www.google.com/s2/favicons?domain=drive.google.com&sz=64"><span>Google Drive</span><b>›</b></a>
+<a href="https://calendar.google.com/"><img src="https://www.google.com/s2/favicons?domain=calendar.google.com&sz=64"><span>Google Calendar</span><b>›</b></a>
         </div>
       </section>
 
@@ -885,6 +910,8 @@
 <a target="_blank" rel="noopener noreferrer" href="https://thebranchschool.org"><span class="resource-icon" aria-hidden="true">🏫</span><span>The Branch School Website</span></a>
 <a target="_blank" rel="noopener noreferrer" href="https://tbstechhelp.weebly.com/"><span class="resource-icon" aria-hidden="true">🛠</span><span>TBS Support Page</span></a>
 <a target="_blank" rel="noopener noreferrer" href="https://www.thebranchschool.org/parents/order-lunch"><span class="resource-icon" aria-hidden="true">🍽</span><span>Simply Fresh Lunch Order</span></a>
+<a target="_blank" rel="noopener noreferrer" href="https://sis.factsmgt.com/accounts/"><span class="resource-icon" aria-hidden="true">🎓</span><span>FACTS</span></a>
+<a target="_blank" rel="noopener noreferrer" href="assets/phoneextensions.html"><span class="resource-icon" aria-hidden="true">☎</span><span>Phone Extensions</span></a>
       </div>
     </section>
     </aside>
@@ -898,7 +925,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260903-mycalendar-first-default-colors-v1"></script>
+  <script src="app.js?v=20260904-layout-v46"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
