@@ -1290,8 +1290,6 @@ function renderLogoAssignmentHover(failed = false) {
 
     if (item.type === "school-calendar") {
       row.classList.add("school-calendar-event");
-      row.style.background = "rgba(76, 132, 86, .92)";
-      row.style.borderColor = "rgba(178, 215, 178, .58)";
     }
 
     if (item.url) {
@@ -1374,16 +1372,16 @@ function renderLogoAssignmentHover(failed = false) {
 
   list.append(
     buildCalendarSection(
-      "SCHOOL CALENDAR",
-      `${schoolItems.length} event${schoolItems.length === 1 ? "" : "s"}`,
-      schoolItems,
-      "school"
-    ),
-    buildCalendarSection(
       "MY CALENDAR",
       `${myItems.length} event${myItems.length === 1 ? "" : "s"}`,
       myItems,
       "personal"
+    ),
+    buildCalendarSection(
+      "SCHOOL CALENDAR",
+      `${schoolItems.length} event${schoolItems.length === 1 ? "" : "s"}`,
+      schoolItems,
+      "school"
     )
   );
 }
@@ -2106,34 +2104,6 @@ if (document.readyState !== "loading") initializeMicrosoft365();
 loadSchoolCalendar();
 
 
-// School Calendar visual distinction: green cards inside the center weekly view.
-(function addSchoolCalendarEventStyles() {
-  if (document.getElementById("branchSchoolCalendarEventStyles")) return;
-
-  const style = document.createElement("style");
-  style.id = "branchSchoolCalendarEventStyles";
-  style.textContent = `
-    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event {
-      background: rgba(104, 151, 112, .88) !important;
-      border-color: rgba(185, 218, 183, .55) !important;
-    }
-
-    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event:hover {
-      background: rgba(113, 164, 121, .96) !important;
-    }
-
-    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
-    .branch-assignment-hover-course {
-      color: #eef8e9 !important;
-    }
-
-    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
-    .branch-assignment-hover-due {
-      color: #fff3bd !important;
-    }
-  `;
-  document.head.appendChild(style);
-})();
 
 
 // Split School Calendar / My Calendar within the same center circle.
@@ -2175,12 +2145,9 @@ loadSchoolCalendar();
       color:#fff;
     }
 
-    #branchAssignmentHover .branch-calendar-split-section.school .branch-calendar-split-title{
-      color:#bfe3bf;
-    }
-
+    #branchAssignmentHover .branch-calendar-split-section.school .branch-calendar-split-title,
     #branchAssignmentHover .branch-calendar-split-section.personal .branch-calendar-split-title{
-      color:#c7d9ea;
+      color:#fff;
     }
 
     #branchAssignmentHover .branch-calendar-split-count{
