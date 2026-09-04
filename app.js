@@ -320,7 +320,9 @@ let classroomAccessToken = "";
 let weekCalendarEvents = [];
 let classroomAssignments = [];
 
-// Microsoft 365 / Exchange data
+// School Calendar + Microsoft 365 / Exchange data
+let schoolCalendarEvents = [];
+let schoolCalendarLoaded = false;
 let microsoftCalendarEvents = [];
 let microsoftAccount = null;
 let microsoftMsal = null;
@@ -579,8 +581,105 @@ function parseGoogleCalendarEventStart(event) {
   return null;
 }
 
+
+function parseSchoolCalendarEventStart(event) {
+  const raw = String(event?.start || "").trim();
+  if (!raw) return null;
+
+  // Date-only School Calendar events must be built as local dates so they do
+  // not shift backward a day in Central Time.
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (dateOnly) {
+    return new Date(
+      Number(dateOnly[1]),
+      Number(dateOnly[2]) - 1,
+      Number(dateOnly[3]),
+      12, 0, 0, 0
+    );
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function isSchoolCalendarAllDay(event) {
+  if (event?.allDay) return true;
+
+  const start = event?.start ? new Date(event.start) : null;
+  const end = event?.end ? new Date(event.end) : null;
+
+  // FACTS sometimes exports all-day events as a near-24-hour timed event
+  // (for example midnight-to-11:30 PM Central). Treat those as all day.
+  if (start && end && !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+    return (end - start) >= 23 * 60 * 60 * 1000;
+  }
+
+  return false;
+}
+
+function formatSchoolCalendarEventTime(event, startDate) {
+  if (isSchoolCalendarAllDay(event)) return "All day";
+  if (!startDate || Number.isNaN(startDate.getTime())) return "Time not available";
+
+  const endDate = event?.end ? new Date(event.end) : null;
+  const options = { hour: "numeric", minute: "2-digit" };
+  const startText = startDate.toLocaleTimeString([], options);
+
+  if (!endDate || Number.isNaN(endDate.getTime())) return startText;
+  return `${startText} – ${endDate.toLocaleTimeString([], options)}`;
+}
+
+async function loadSchoolCalendar() {
+  try {
+    const response = await fetch(`data/facts-calendar.json?v=${Date.now()}`, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`School Calendar HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    schoolCalendarEvents = Array.isArray(data) ? data : [];
+    schoolCalendarLoaded = true;
+
+    console.log(`School Calendar loaded: ${schoolCalendarEvents.length} events`);
+
+    renderMiniWeekCalendar();
+    renderLogoAssignmentHover();
+    updateWeeklyScheduleLabels();
+  } catch (error) {
+    schoolCalendarLoaded = false;
+    console.error("School Calendar loading failed:", error);
+    renderLogoAssignmentHover();
+  }
+}
+
 function getWeekScheduleItems() {
   const { start, end } = getCurrentSchoolWeekBounds();
+
+  const schoolItems = schoolCalendarEvents
+    .map(event => {
+      const startDate = parseSchoolCalendarEventStart(event);
+      return {
+        type: "school-calendar",
+        sortDate: startDate,
+        title: event?.title || "Untitled event",
+        dateText: !startDate || Number.isNaN(startDate.getTime()) ? "" : startDate.toLocaleDateString([], {
+          weekday: "long", month: "short", day: "numeric"
+        }),
+        timeText: formatSchoolCalendarEventTime(event, startDate),
+        sourceText: "SCHOOL CALENDAR",
+        details: [event?.location, event?.description].filter(Boolean).join("\n"),
+        url: ""
+      };
+    })
+    .filter(item =>
+      item.sortDate &&
+      !Number.isNaN(item.sortDate.getTime()) &&
+      item.sortDate >= start &&
+      item.sortDate < end
+    );
 
   const calendarItems = weekCalendarEvents.map(event => {
     const startDate = parseGoogleCalendarEventStart(event);
@@ -618,7 +717,7 @@ function getWeekScheduleItems() {
         weekday: "long", month: "short", day: "numeric"
       }),
       timeText,
-      sourceText: "Outlook",
+      sourceText: "MY CALENDAR",
       details: [
         event?.location?.displayName,
         event?.bodyPreview
@@ -658,7 +757,13 @@ function getWeekScheduleItems() {
   });
 
   const seen = new Set();
-  return [...classroomItems, ...filteredCalendarItems, ...microsoftItems]
+  return [...schoolItems, ...classroomItems, ...filteredCalendarItems, ...microsoftItems]
+    .filter(item =>
+      item.sortDate &&
+      !Number.isNaN(item.sortDate.getTime()) &&
+      item.sortDate >= start &&
+      item.sortDate < end
+    )
     .filter(item => {
       const dayKey = !item.sortDate || Number.isNaN(item.sortDate.getTime())
         ? ""
@@ -781,14 +886,14 @@ function renderMiniWeekCalendar() {
     daysHost.appendChild(row);
   });
 
-  if (!items.length && (calendarAccessToken || microsoftCalendarConnected)) {
+  if (!items.length && (schoolCalendarLoaded || calendarAccessToken || microsoftCalendarConnected)) {
     const empty = document.createElement("div");
     empty.className = "branch-miniweek-noitems";
     empty.textContent = "No upcoming calendar events are scheduled for the rest of this school week.";
     daysHost.appendChild(empty);
   }
 
-  if (calendarAccessToken || microsoftCalendarConnected) {
+  if (schoolCalendarLoaded || calendarAccessToken || microsoftCalendarConnected) {
     status.textContent = items.length
       ? `Showing next ${items.length} event${items.length === 1 ? "" : "s"}`
       : "Calendar is up to date";
@@ -832,7 +937,7 @@ function showScheduleItemDetails(scheduleItem) {
   const openLink = modal.querySelector(".branch-calendar-open-google");
   if (!list || !title || !kicker || !openLink) return;
 
-  kicker.textContent = "Google Calendar";
+  kicker.textContent = scheduleItem.sourceText || "Calendar";
   title.textContent = scheduleItem.title || "Event Details";
   list.innerHTML = "";
 
@@ -869,7 +974,9 @@ function showScheduleItemDetails(scheduleItem) {
     openLink.href = scheduleItem.url;
     openLink.textContent = scheduleItem.type === "classroom"
       ? "Open in Google Classroom ↗"
-      : "Open in Google Calendar ↗";
+      : scheduleItem.sourceText === "MY CALENDAR"
+        ? "Open My Calendar ↗"
+        : "Open Calendar ↗";
   } else {
     openLink.style.display = "none";
   }
@@ -1124,11 +1231,11 @@ function renderLogoAssignmentHover(failed = false) {
     return;
   }
 
-  if (!calendarAccessToken && !microsoftCalendarConnected) {
+  if (!schoolCalendarLoaded && !calendarAccessToken && !microsoftCalendarConnected) {
     if (subtitle) subtitle.textContent = "Outlook + School Calendar";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "Connect Microsoft 365 or Google Calendar to load your schedule.";
+    empty.textContent = "Loading School Calendar. Connect Microsoft 365 to add your personal calendar.";
     list.appendChild(empty);
     return;
   }
@@ -1139,9 +1246,7 @@ function renderLogoAssignmentHover(failed = false) {
     .slice(0, 20);
 
   if (subtitle) {
-    subtitle.textContent = upcoming.length === 1
-      ? "1 upcoming calendar event"
-      : `${upcoming.length} upcoming calendar events`;
+    subtitle.textContent = "School Calendar + My Calendar";
   }
 
   if (!upcoming.length) {
@@ -1153,11 +1258,13 @@ function renderLogoAssignmentHover(failed = false) {
   }
 
   upcoming.forEach(item => {
-    const link = document.createElement("a");
+    const link = document.createElement(item.url ? "a" : "div");
     link.className = "branch-assignment-hover-item";
-    link.href = item.url || "https://calendar.google.com/calendar/u/0/r/agenda";
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
+    if (item.url) {
+      link.href = item.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    }
     link.title = `${item.title || "Untitled event"} • ${item.dateText || ""} ${item.timeText || ""}`.trim();
 
     const main = document.createElement("div");
@@ -1672,8 +1779,7 @@ async function loadMicrosoft365Data(interactive = false) {
   const messagesPath =
     "/me/mailFolders/inbox/messages" +
     "?$select=subject,from,receivedDateTime,webLink,isRead" +
-    "&$filter=isRead%20eq%20false" +
-    "&$orderby=receivedDateTime%20desc&$top=15";
+    "&$filter=isRead%20eq%20false&$top=50";
 
   try {
     const [profile, calendar, inbox, messages] = await Promise.all([
@@ -1696,7 +1802,11 @@ async function loadMicrosoft365Data(interactive = false) {
       if (accountStatus) accountStatus.textContent = "Microsoft 365 connected";
     }
 
-    renderMicrosoftInbox(inbox, messages?.value || []);
+    const unreadMessages = Array.isArray(messages?.value) ? messages.value : [];
+    unreadMessages.sort((a, b) =>
+      new Date(b?.receivedDateTime || 0) - new Date(a?.receivedDateTime || 0)
+    );
+    renderMicrosoftInbox(inbox, unreadMessages);
     setMicrosoftStatus("Exchange calendar + inbox connected.");
     updateMicrosoftButton();
 
@@ -1858,3 +1968,7 @@ if (document.readyState !== "loading") initializeMicrosoft365();
     install();
   }
 })();
+
+
+// Load the shared School Calendar independently of Microsoft/Google sign-in.
+loadSchoolCalendar();
