@@ -1247,7 +1247,7 @@ function renderLogoAssignmentHover(failed = false) {
   list.innerHTML = "";
 
   if (failed) {
-    if (subtitle) subtitle.textContent = "Google Calendar unavailable";
+    if (subtitle) subtitle.textContent = "Calendar unavailable";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
     empty.textContent = "Calendar events could not be loaded right now.";
@@ -1256,7 +1256,7 @@ function renderLogoAssignmentHover(failed = false) {
   }
 
   if (!schoolCalendarLoaded && !calendarAccessToken && !microsoftCalendarConnected) {
-    if (subtitle) subtitle.textContent = "Outlook + School Calendar";
+    if (subtitle) subtitle.textContent = "School Calendar + My Calendar";
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
     empty.textContent = "Loading School Calendar. Connect Microsoft 365 to add your personal calendar.";
@@ -1266,42 +1266,36 @@ function renderLogoAssignmentHover(failed = false) {
 
   const now = new Date();
 
-  // getWeekScheduleItems() is already limited to the current Monday-Friday
-  // school week. Show the entire week here, including events from earlier days,
-  // and let the center list scroll when there are more items than fit.
-  const upcoming = getWeekScheduleItems()
+  const weekItems = getWeekScheduleItems()
     .filter(item => {
       if (!item.sortDate || Number.isNaN(item.sortDate.getTime())) return false;
       return item.type === "school-calendar" || item.type === "calendar";
     });
 
+  const schoolItems = weekItems.filter(item => item.type === "school-calendar");
+  const myItems = weekItems.filter(item => item.type === "calendar");
+
   if (subtitle) {
-    subtitle.textContent = "School Calendar + My Calendar";
+    subtitle.textContent = "Two calendars • one weekly view";
   }
 
-  if (!upcoming.length) {
-    const empty = document.createElement("div");
-    empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "No calendar events are scheduled this week.";
-    list.appendChild(empty);
-    return;
-  }
+  function buildEventRow(item) {
+    const row = document.createElement(item.url ? "a" : "div");
+    row.className = "branch-assignment-hover-item";
 
-  upcoming.forEach(item => {
-    const link = document.createElement(item.url ? "a" : "div");
-    link.className = "branch-assignment-hover-item";
     if (item.type === "school-calendar") {
-      link.classList.add("school-calendar-event");
-      // Inline values make the distinction survive any older stylesheet rules.
-      link.style.background = "rgba(76, 132, 86, .92)";
-      link.style.borderColor = "rgba(178, 215, 178, .58)";
+      row.classList.add("school-calendar-event");
+      row.style.background = "rgba(76, 132, 86, .92)";
+      row.style.borderColor = "rgba(178, 215, 178, .58)";
     }
+
     if (item.url) {
-      link.href = item.url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+      row.href = item.url;
+      row.target = "_blank";
+      row.rel = "noopener noreferrer";
     }
-    link.title = `${item.title || "Untitled event"} • ${item.dateText || ""} ${item.timeText || ""}`.trim();
+
+    row.title = `${item.title || "Untitled event"} • ${item.dateText || ""} ${item.timeText || ""}`.trim();
 
     const main = document.createElement("div");
     main.className = "branch-assignment-hover-main";
@@ -1312,10 +1306,11 @@ function renderLogoAssignmentHover(failed = false) {
 
     const source = document.createElement("span");
     source.className = "branch-assignment-hover-course";
-    source.textContent = item.sourceText || "Google Calendar";
+    source.textContent = item.sourceText || "Calendar";
 
     const when = document.createElement("span");
     when.className = "branch-assignment-hover-due";
+
     const eventDate = item.sortDate;
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
@@ -1333,9 +1328,59 @@ function renderLogoAssignmentHover(failed = false) {
     }
 
     main.append(name, source);
-    link.append(main, when);
-    list.appendChild(link);
-  });
+    row.append(main, when);
+    return row;
+  }
+
+  function buildCalendarSection(titleText, countText, items, kind) {
+    const section = document.createElement("section");
+    section.className = `branch-calendar-split-section ${kind}`;
+
+    const header = document.createElement("div");
+    header.className = "branch-calendar-split-header";
+
+    const title = document.createElement("span");
+    title.className = "branch-calendar-split-title";
+    title.textContent = titleText;
+
+    const count = document.createElement("span");
+    count.className = "branch-calendar-split-count";
+    count.textContent = countText;
+
+    header.append(title, count);
+
+    const body = document.createElement("div");
+    body.className = "branch-calendar-split-list";
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "branch-calendar-split-empty";
+      empty.textContent = kind === "school"
+        ? "No School Calendar events this week."
+        : "No My Calendar events this week.";
+      body.appendChild(empty);
+    } else {
+      items.forEach(item => body.appendChild(buildEventRow(item)));
+    }
+
+    section.append(header, body);
+    return section;
+  }
+
+  list.append(
+    buildCalendarSection(
+      "SCHOOL CALENDAR",
+      `${schoolItems.length} event${schoolItems.length === 1 ? "" : "s"}`,
+      schoolItems,
+      "school"
+    ),
+    buildCalendarSection(
+      "MY CALENDAR",
+      `${myItems.length} event${myItems.length === 1 ? "" : "s"}`,
+      myItems,
+      "personal"
+    )
+  );
 }
 
 function ensureClassroomModal() {
@@ -2034,6 +2079,97 @@ loadSchoolCalendar();
     #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
     .branch-assignment-hover-due {
       color: #fff3bd !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+
+// Split School Calendar / My Calendar within the same center circle.
+(function addSplitCalendarStyles() {
+  if (document.getElementById("branchSplitCalendarStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "branchSplitCalendarStyles";
+  style.textContent = `
+    #branchAssignmentHoverList{
+      display:grid;
+      grid-template-rows:minmax(0,1fr) minmax(0,1fr);
+      gap:10px;
+      min-height:0;
+      overflow:hidden !important;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-section{
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0 4px 5px;
+      flex:0 0 auto;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-title{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+      color:#fff;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-section.school .branch-calendar-split-title{
+      color:#bfe3bf;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-section.personal .branch-calendar-split-title{
+      color:#c7d9ea;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-count{
+      font-size:9px;
+      font-weight:800;
+      color:rgba(255,255,255,.66);
+    }
+
+    #branchAssignmentHover .branch-calendar-split-list{
+      min-height:0;
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      padding-right:3px;
+      display:grid;
+      gap:6px;
+      align-content:start;
+      scrollbar-width:thin;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-list::-webkit-scrollbar{
+      width:5px;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-list::-webkit-scrollbar-thumb{
+      background:rgba(255,255,255,.28);
+      border-radius:999px;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-empty{
+      padding:10px 8px;
+      border:1px dashed rgba(255,255,255,.16);
+      border-radius:10px;
+      font-size:10px;
+      color:rgba(255,255,255,.65);
+      text-align:center;
+    }
+
+    #branchAssignmentHover .branch-calendar-split-section .branch-assignment-hover-item{
+      margin:0 !important;
+      flex:0 0 auto;
     }
   `;
   document.head.appendChild(style);
