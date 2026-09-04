@@ -2199,32 +2199,56 @@ loadSchoolCalendar();
 const AFTERSCHOOL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?output=csv";
 
 function csvRows(text){
-  const rows=[]; let row=[],cell="",quoted=false;
+  const rows=[];
+  let row=[], cell="", quoted=false;
   for(let i=0;i<text.length;i++){
-    const c=text[i],n=text[i+1];
-    if(c==='"'){ if(quoted&&n==='"'){cell+='"';i++;} else quoted=!quoted; }
-    else if(c===","&&!quoted){row.push(cell);cell="";}
-    else if((c==="\n"||c==="\r")&&!quoted){
-      if(c==="\r"&&n==="\n") i++;
+    const c=text[i], n=text[i+1];
+    if(c === '"'){
+      if(quoted && n === '"'){ cell += '"'; i++; }
+      else quoted = !quoted;
+    }else if(c === "," && !quoted){
       row.push(cell); cell="";
-      if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+    }else if((c === "\n" || c === "\r") && !quoted){
+      if(c === "\r" && n === "\n") i++;
+      row.push(cell); cell="";
+      if(row.some(v=>String(v).trim() !== "")) rows.push(row);
       row=[];
-    } else cell+=c;
+    }else{
+      cell += c;
+    }
   }
   row.push(cell);
-  if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+  if(row.some(v=>String(v).trim() !== "")) rows.push(row);
   return rows;
+}
+
+function aseIcon(name){
+  const s=String(name||"").toLowerCase();
+  if(s.includes("hoops") || s.includes("basketball")) return "🏀";
+  if(s.includes("coding") || s.includes("computer")) return "💻";
+  if(s.includes("art")) return "🎨";
+  if(s.includes("robot")) return "🤖";
+  if(s.includes("piano") || s.includes("music")) return "🎵";
+  if(s.includes("soccer")) return "⚽";
+  if(s.includes("chess")) return "♟️";
+  if(s.includes("ballet") || s.includes("dance")) return "🩰";
+  if(s.includes("debate")) return "💬";
+  if(s.includes("fine motor")) return "✋";
+  if(s.includes("athlete")) return "🏃";
+  return "⭐";
 }
 
 async function loadAfterschoolToday(){
   const host=document.getElementById("afterschoolToday");
   if(!host) return;
   host.innerHTML="Loading…";
+
   try{
     const res=await fetch(AFTERSCHOOL_CSV_URL+"&_="+Date.now(),{cache:"no-store"});
     if(!res.ok) throw new Error("HTTP "+res.status);
+
     const rows=csvRows(await res.text());
-    if(rows.length<2) throw new Error("No schedule rows");
+    if(rows.length < 2) throw new Error("No schedule rows");
 
     const norm=s=>String(s||"").replace(/^\uFEFF/,"").trim().toLowerCase();
     const headers=rows[0].map(norm);
@@ -2236,37 +2260,66 @@ async function loadAfterschoolToday(){
     const timeI=findCol("Time");
     const dutyI=findCol("Afterschool LT Duty","Afterschool Duty","LT Duty");
 
-    if(dayI<0) throw new Error("Day column missing");
+    if(dayI < 0) throw new Error("Day column missing");
 
-    const today=new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"America/Chicago"}).format(new Date());
-    const items=rows.slice(1).filter(r=>norm(r[dayI])===norm(today));
+    const today=new Intl.DateTimeFormat("en-US",{
+      weekday:"long",
+      timeZone:"America/Chicago"
+    }).format(new Date());
+
+    const items=rows.slice(1).filter(r=>norm(r[dayI]) === norm(today));
 
     if(!items.length){
-      host.innerHTML=`<div class="afterschool-class"><strong>${today}</strong><div class="afterschool-meta">No afterschool schedule listed.</div></div>`;
+      host.innerHTML=`<div class="ase-empty">No afterschool information is listed for ${today}.</div>`;
       return;
     }
 
-    const dutyRow=dutyI>=0 ? items.find(r=>String(r[dutyI]||"").trim()) : null;
+    const dutyRow=dutyI >= 0 ? items.find(r=>String(r[dutyI]||"").trim()) : null;
     const duty=dutyRow ? String(dutyRow[dutyI]||"").trim() : "";
-    let html=`<div class="afterschool-class"><strong>On Duty: ${duty||"Not listed"}</strong></div>`;
 
-    const enrichment=classI>=0 ? items.filter(r=>String(r[classI]||"").trim()) : [];
+    let html=`
+      <div class="ase-duty-card">
+        <div class="ase-duty-icon" aria-hidden="true">👥</div>
+        <div class="ase-duty-name">${duty || "Duty not listed"}</div>
+      </div>
+      <div class="ase-section-title">
+        <span aria-hidden="true">📘</span>
+        <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
+      </div>
+    `;
+
+    const enrichment=classI >= 0
+      ? items.filter(r=>String(r[classI]||"").trim())
+      : [];
+
     if(enrichment.length){
       html += enrichment.map(r=>{
         const name=String(r[classI]||"").trim();
-        const grades=gradesI>=0?String(r[gradesI]||"").trim():"";
-        const time=timeI>=0?String(r[timeI]||"").trim():"";
-        const meta=[grades?`Grades ${grades}`:"",time].filter(Boolean).join(" • ");
-        return `<div class="afterschool-class"><strong>${name}</strong>${meta?`<div class="afterschool-meta">${meta}</div>`:""}</div>`;
+        const grades=gradesI >= 0 ? String(r[gradesI]||"").trim() : "";
+        const time=timeI >= 0 ? String(r[timeI]||"").trim() : "";
+        const meta=[grades ? `Grades ${grades}` : "", time].filter(Boolean).join(" • ");
+
+        return `
+          <div class="ase-program">
+            <div class="ase-program-icon" aria-hidden="true">${aseIcon(name)}</div>
+            <div>
+              <div class="ase-program-name"><span class="ase-prefix">ASE:</span> ${name}</div>
+              ${meta ? `<div class="ase-program-meta">${meta}</div>` : ""}
+            </div>
+          </div>
+        `;
       }).join("");
-    } else {
-      html += `<div class="afterschool-meta" style="margin-top:8px">No enrichment classes listed today.</div>`;
+    }else{
+      html += `<div class="ase-empty">No ASE programs are listed today.</div>`;
     }
+
     host.innerHTML=html;
+
   }catch(err){
     console.error("Afterschool schedule failed:",err);
-    host.innerHTML='<div class="afterschool-class"><strong>Schedule unavailable</strong><div class="afterschool-meta">Could not load the Google Sheet.</div></div>';
+    host.innerHTML=`<div class="ase-empty">Afterschool information is temporarily unavailable.</div>`;
   }
 }
+
 loadAfterschoolToday();
 
