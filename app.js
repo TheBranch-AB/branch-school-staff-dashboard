@@ -2196,81 +2196,77 @@ loadSchoolCalendar();
 
 
 // ===== Afterschool Enrichment Google Sheet =====
-const AFTERSCHOOL_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?output=csv';
+const AFTERSCHOOL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?output=csv";
 
 function csvRows(text){
-  const rows=[];
-  let row=[], cell="", quoted=false;
-  for(let i=0;i<text.length;i++) {
-    const c=text[i], n=text[i+1];
-    if(c === '"') {
-      if(quoted && n === '"') { cell += '"'; i++; }
-      else quoted = !quoted;
-    } else if(c === "," && !quoted) {
+  const rows=[]; let row=[],cell="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i],n=text[i+1];
+    if(c==='"'){ if(quoted&&n==='"'){cell+='"';i++;} else quoted=!quoted; }
+    else if(c===","&&!quoted){row.push(cell);cell="";}
+    else if((c==="\n"||c==="\r")&&!quoted){
+      if(c==="\r"&&n==="\n") i++;
       row.push(cell); cell="";
-    } else if((c === "\n" || c === "\r") && !quoted) {
-      if(c === "\r" && n === "\n") i++;
-      row.push(cell); cell="";
-      if(row.some(v=>v.trim() !== "")) rows.push(row);
+      if(row.some(v=>String(v).trim()!=="")) rows.push(row);
       row=[];
-    } else {
-      cell += c;
-    }
+    } else cell+=c;
   }
   row.push(cell);
-  if(row.some(v=>v.trim() !== "")) rows.push(row);
+  if(row.some(v=>String(v).trim()!=="")) rows.push(row);
   return rows;
 }
 
 async function loadAfterschoolToday(){
   const host=document.getElementById("afterschoolToday");
   if(!host) return;
-  const status=host.querySelector(".afterschool-status");
-  try {
-    const res=await fetch(AFTERSCHOOL_CSV_URL, {cache:"no-store"});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  host.innerHTML="Loading…";
+  try{
+    const res=await fetch(AFTERSCHOOL_CSV_URL+"&_="+Date.now(),{cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
     const rows=csvRows(await res.text());
-    if(rows.length < 2) throw new Error("No rows");
+    if(rows.length<2) throw new Error("No schedule rows");
 
-    const headers=rows[0].map(h=>h.trim().toLowerCase());
-    const dayI=headers.indexOf("day");
-    const classI=headers.indexOf("afterschool enrichment");
-    const gradesI=headers.indexOf("grades");
-    const timeI=headers.indexOf("time");
-    const dutyI=headers.indexOf("afterschool lt duty");
+    const norm=s=>String(s||"").replace(/^\uFEFF/,"").trim().toLowerCase();
+    const headers=rows[0].map(norm);
+    const findCol=(...names)=>headers.findIndex(h=>names.map(norm).includes(h));
 
-    if(dayI < 0 || classI < 0) throw new Error("Required columns missing");
+    const dayI=findCol("Day");
+    const classI=findCol("Afterschool Enrichment","Enrichment");
+    const gradesI=findCol("Grades","Grade");
+    const timeI=findCol("Time");
+    const dutyI=findCol("Afterschool LT Duty","Afterschool Duty","LT Duty");
 
-    const today=new Intl.DateTimeFormat("en-US", {weekday:"long", timeZone:"America/Chicago"}).format(new Date());
-    const items=rows.slice(1).filter(r => (r[dayI]||"").trim().toLowerCase() === today.toLowerCase());
+    if(dayI<0) throw new Error("Day column missing");
 
-    if(!items.length) {
-      status.innerHTML = `<div>No enrichment scheduled for ${today}.</div>`;
+    const today=new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"America/Chicago"}).format(new Date());
+    const items=rows.slice(1).filter(r=>norm(r[dayI])===norm(today));
+
+    if(!items.length){
+      host.innerHTML=`<div class="afterschool-class"><strong>${today}</strong><div class="afterschool-meta">No afterschool schedule listed.</div></div>`;
       return;
     }
 
-    const duty = dutyI >= 0
-      ? ((items.find(r => (r[dutyI]||"").trim()) || [])[dutyI] || "").trim()
-      : "";
+    const dutyRow=dutyI>=0 ? items.find(r=>String(r[dutyI]||"").trim()) : null;
+    const duty=dutyRow ? String(dutyRow[dutyI]||"").trim() : "";
+    let html=`<div class="afterschool-class"><strong>On Duty: ${duty||"Not listed"}</strong></div>`;
 
-    const dutyHtml = duty
-      ? `<div class="afterschool-class"><strong>On Duty: ${duty}</strong></div>`
-      : `<div class="afterschool-class"><strong>On Duty: Not listed</strong></div>`;
-
-    const enrichmentHtml = items.map(r => {
-      const name=(r[classI]||"").trim();
-      if(!name) return "";
-      const grades=gradesI >= 0 ? (r[gradesI]||"").trim() : "";
-      const time=timeI >= 0 ? (r[timeI]||"").trim() : "";
-      const meta=[grades ? `Grades ${grades}` : "", time].filter(Boolean).join(" • ");
-      return `<div class="afterschool-class"><strong>${name}</strong>${meta ? `<div class="afterschool-meta">${meta}</div>` : ""}</div>`;
-    }).join("");
-
-    status.innerHTML = dutyHtml + enrichmentHtml;
-  } catch(err) {
-    console.error("Afterschool schedule failed:", err);
-    status.textContent="Afterschool schedule is temporarily unavailable.";
+    const enrichment=classI>=0 ? items.filter(r=>String(r[classI]||"").trim()) : [];
+    if(enrichment.length){
+      html += enrichment.map(r=>{
+        const name=String(r[classI]||"").trim();
+        const grades=gradesI>=0?String(r[gradesI]||"").trim():"";
+        const time=timeI>=0?String(r[timeI]||"").trim():"";
+        const meta=[grades?`Grades ${grades}`:"",time].filter(Boolean).join(" • ");
+        return `<div class="afterschool-class"><strong>${name}</strong>${meta?`<div class="afterschool-meta">${meta}</div>`:""}</div>`;
+      }).join("");
+    } else {
+      html += `<div class="afterschool-meta" style="margin-top:8px">No enrichment classes listed today.</div>`;
+    }
+    host.innerHTML=html;
+  }catch(err){
+    console.error("Afterschool schedule failed:",err);
+    host.innerHTML='<div class="afterschool-class"><strong>Schedule unavailable</strong><div class="afterschool-meta">Could not load the Google Sheet.</div></div>';
   }
 }
-
 loadAfterschoolToday();
+
