@@ -1241,8 +1241,21 @@ function renderLogoAssignmentHover(failed = false) {
   }
 
   const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
   const upcoming = getWeekScheduleItems()
-    .filter(item => item.type === "calendar" && item.sortDate && item.sortDate >= now)
+    .filter(item => {
+      if (!item.sortDate || Number.isNaN(item.sortDate.getTime())) return false;
+
+      // School Calendar all-day events should remain visible for the entire day,
+      // even after noon/midnight. Personal timed events disappear after they pass.
+      if (item.type === "school-calendar") {
+        return item.sortDate >= todayStart;
+      }
+
+      return item.type === "calendar" && item.sortDate >= now;
+    })
     .slice(0, 20);
 
   if (subtitle) {
