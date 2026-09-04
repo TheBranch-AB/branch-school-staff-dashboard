@@ -1,0 +1,139 @@
+name: Update FACTS Calendar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download FACTS iCal feed
+        env:
+          FACTS_ICAL_URL: ${{ secrets.FACTS_ICAL_URL }}
+        run: |
+          mkdir -p data
+          curl --fail --location --silent --show-error \
+            "$FACTS_ICAL_URL" \
+            --output data/facts-calendar.ics
+
+      - name: Convert iCal to JSON
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from datetime import datetime
+
+          ics_path = Path("data/facts-calendar.ics")
+          json_path = Path("data/facts-calendar.json")
+
+          text = ics_path.read_text(encoding="utf-8", errors="replace")
+
+          # Unfold iCalendar continuation lines.
+          text = re.sub(r"\r?\n[ \t]", "", text)
+
+          def unescape(value):
+              return (
+                  value.replace("\\n", "\n")
+                       .replace("\\N", "\n")
+                       .replace("\\,", ",")
+                       .replace("\\;", ";")
+                       .replace("\\\\", "\\")
+                       .strip()
+              )
+
+          def parse_date(raw):
+              raw = raw.strip()
+
+              if re.fullmatch(r"\d{8}", raw):
+                  dt = datetime.strptime(raw, "%Y%m%d")
+                  return {
+                      "value": dt.strftime("%Y-%m-%d"),
+                      "allDay": True
+                  }
+
+              if re.fullmatch(r"\d{8}T\d{6}Z", raw):
+                  dt = datetime.strptime(raw, "%Y%m%dT%H%M%SZ")
+                  return {
+                      "value": dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                      "allDay": False
+                  }
+
+              if re.fullmatch(r"\d{8}T\d{6}", raw):
+                  dt = datetime.strptime(raw, "%Y%m%dT%H%M%S")
+                  return {
+                      "value": dt.strftime("%Y-%m-%dT%H:%M:%S"),
+                      "allDay": False
+                  }
+
+              return {
+                  "value": raw,
+                  "allDay": False
+              }
+
+          events = []
+
+          for block in re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", text, flags=re.S):
+              fields = {}
+
+              for line in block.splitlines():
+                  if ":" not in line:
+                      continue
+
+                  key, value = line.split(":", 1)
+                  key = key.split(";", 1)[0].upper()
+
+                  if key not in fields:
+                      fields[key] = unescape(value)
+
+              if not fields.get("SUMMARY") or not fields.get("DTSTART"):
+                  continue
+
+              start = parse_date(fields["DTSTART"])
+              end = parse_date(fields["DTEND"]) if fields.get("DTEND") else None
+
+              events.append({
+                  "title": fields.get("SUMMARY", ""),
+                  "description": fields.get("DESCRIPTION", ""),
+                  "location": fields.get("LOCATION", ""),
+                  "start": start["value"],
+                  "end": end["value"] if end else None,
+                  "allDay": start["allDay"],
+                  "uid": fields.get("UID", "")
+              })
+
+          events.sort(key=lambda event: event.get("start") or "")
+
+          json_path.write_text(
+              json.dumps(events, indent=2, ensure_ascii=False),
+              encoding="utf-8"
+          )
+
+          print(f"Wrote {len(events)} FACTS events to {json_path}")
+          PY
+
+      - name: Remove private iCal file
+        run: rm -f data/facts-calendar.ics
+
+      - name: Commit updated calendar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/facts-calendar.json
+
+          if git diff --cached --quiet; then
+            echo "No calendar changes."
+          else
+            git commit -m "Update FACTS school calendar"
+            git push
+          fi
