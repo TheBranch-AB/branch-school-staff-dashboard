@@ -583,7 +583,15 @@ function parseGoogleCalendarEventStart(event) {
 
 
 function parseSchoolCalendarEventStart(event) {
-  const raw = String(event?.start || "").trim();
+  const startValue =
+    event?.start?.dateTime ||
+    event?.start?.date ||
+    event?.start ||
+    event?.startDate ||
+    event?.date ||
+    "";
+
+  const raw = String(startValue).trim();
   if (!raw) return null;
 
   // Date-only School Calendar events must be built as local dates so they do
@@ -605,8 +613,10 @@ function parseSchoolCalendarEventStart(event) {
 function isSchoolCalendarAllDay(event) {
   if (event?.allDay) return true;
 
-  const start = event?.start ? new Date(event.start) : null;
-  const end = event?.end ? new Date(event.end) : null;
+  const rawStart = event?.start?.dateTime || event?.start?.date || event?.start || event?.startDate || "";
+  const rawEnd = event?.end?.dateTime || event?.end?.date || event?.end || event?.endDate || "";
+  const start = rawStart ? new Date(rawStart) : null;
+  const end = rawEnd ? new Date(rawEnd) : null;
 
   // FACTS sometimes exports all-day events as a near-24-hour timed event
   // (for example midnight-to-11:30 PM Central). Treat those as all day.
@@ -621,7 +631,8 @@ function formatSchoolCalendarEventTime(event, startDate) {
   if (isSchoolCalendarAllDay(event)) return "All day";
   if (!startDate || Number.isNaN(startDate.getTime())) return "Time not available";
 
-  const endDate = event?.end ? new Date(event.end) : null;
+  const rawEnd = event?.end?.dateTime || event?.end?.date || event?.end || event?.endDate || "";
+  const endDate = rawEnd ? new Date(rawEnd) : null;
   const options = { hour: "numeric", minute: "2-digit" };
   const startText = startDate.toLocaleTimeString([], options);
 
@@ -640,9 +651,22 @@ async function loadSchoolCalendar() {
     }
 
     const data = await response.json();
-    schoolCalendarEvents = Array.isArray(data) ? data : [];
+
+    // The GitHub converter may output either a plain array or an object
+    // containing the event array. Support both formats.
+    if (Array.isArray(data)) {
+      schoolCalendarEvents = data;
+    } else if (Array.isArray(data?.events)) {
+      schoolCalendarEvents = data.events;
+    } else if (Array.isArray(data?.items)) {
+      schoolCalendarEvents = data.items;
+    } else {
+      schoolCalendarEvents = [];
+    }
+
     schoolCalendarLoaded = true;
 
+    console.log("School Calendar JSON shape:", data);
     console.log(`School Calendar loaded: ${schoolCalendarEvents.length} events`);
 
     renderMiniWeekCalendar();
