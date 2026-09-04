@@ -603,7 +603,12 @@
 
 
 <style id="fullCircleCenterLogoOverride">
-  /* Make the badge artwork fill the complete circular placeholder. */
+  /* Make the logo itself become the full placeholder circle. */
+  .hero .badge-stage {
+    overflow: hidden !important;
+    border-radius: 50% !important;
+  }
+
   .hero .badge-stage .logo-shell {
     position: absolute !important;
     inset: 0 !important;
@@ -613,15 +618,19 @@
     max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
     overflow: hidden !important;
     border-radius: 50% !important;
   }
 
   .hero .badge-stage .logo-shell > img.portal-badge {
     position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 116% !important;
+    height: 116% !important;
     max-width: none !important;
     max-height: none !important;
     margin: 0 !important;
@@ -630,8 +639,16 @@
     object-fit: cover !important;
     object-position: center !important;
     border-radius: 50% !important;
-    transform: scale(1.16) !important;
-    transform-origin: center center !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  /* Remove the old decorative placeholder rings so only the badge is visible. */
+  .hero .badge-stage::before,
+  .hero .badge-stage::after,
+  .hero .badge-stage .logo-shell::before,
+  .hero .badge-stage .logo-shell::after {
+    display: none !important;
+    content: none !important;
   }
 </style>
 
@@ -704,7 +721,7 @@
       <div class="badge-stage" tabindex="0">
         <div class="logo-shell">
           <img
-            src="assets/staff-dashboard-center-logo.png?v=20260903-fill-placeholder-v1"
+            src="assets/staff-dashboard-center-logo.png?v=20260903-edge-to-edge-v1"
             class="portal-badge"
             alt="The Branch School Staff Dashboard"
           >
