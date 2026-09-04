@@ -25,7 +25,12 @@ function prettifyNameFromEmail(email){
 function setStudentInfo(name="Staff Member", email="Google sign-in not connected yet"){
   document.getElementById("studentName").textContent = name;
   document.getElementById("studentEmail").textContent = email;
-  document.getElementById("avatar").textContent = (name || "S").charAt(0).toUpperCase();
+
+  const avatar = document.getElementById("avatar");
+  if (avatar && avatar.dataset.photoLoaded !== "true") {
+    avatar.textContent = (name || "S").charAt(0).toUpperCase();
+  }
+
   document.getElementById("accountStatus").textContent =
     email && email.toLowerCase().endsWith("@thebranchschool.org") ? "Branch staff" : "Not connected";
 }
@@ -1834,6 +1839,49 @@ async function graphGet(path, token) {
   return response.json();
 }
 
+
+let microsoftProfilePhotoUrl = "";
+
+async function loadMicrosoftProfilePhoto(token) {
+  const avatar = document.getElementById("avatar");
+  if (!avatar || !token) return;
+
+  try {
+    const response = await fetch("https://graph.microsoft.com/v1.0/me/photo/$value", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // 404 simply means this Microsoft account has no profile photo.
+    if (response.status === 404) {
+      console.log("No Microsoft 365 profile photo is set for this user.");
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Microsoft profile photo HTTP ${response.status}`);
+    }
+
+    const blob = await response.blob();
+
+    if (microsoftProfilePhotoUrl) {
+      URL.revokeObjectURL(microsoftProfilePhotoUrl);
+    }
+    microsoftProfilePhotoUrl = URL.createObjectURL(blob);
+
+    avatar.textContent = "";
+    avatar.dataset.photoLoaded = "true";
+    avatar.style.backgroundImage = `url("${microsoftProfilePhotoUrl}")`;
+    avatar.style.backgroundSize = "cover";
+    avatar.style.backgroundPosition = "center";
+    avatar.style.backgroundRepeat = "no-repeat";
+    avatar.style.boxShadow = "inset 0 0 0 1px rgba(255,255,255,.18)";
+  } catch (error) {
+    console.warn("Microsoft 365 profile photo could not be loaded:", error);
+  }
+}
+
 async function loadMicrosoft365Data(interactive = false) {
   const token = await getMicrosoftAccessToken(interactive);
   if (!token) {
@@ -1881,6 +1929,9 @@ async function loadMicrosoft365Data(interactive = false) {
       saveSignedInUser(name, email);
       const accountStatus = document.getElementById("accountStatus");
       if (accountStatus) accountStatus.textContent = "Microsoft 365 connected";
+
+      // User.Read already grants access to the signed-in user's profile photo.
+      loadMicrosoftProfilePhoto(token);
     }
 
     const unreadMessages = Array.isArray(messages?.value) ? messages.value : [];
