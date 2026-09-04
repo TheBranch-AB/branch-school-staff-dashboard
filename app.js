@@ -1290,6 +1290,9 @@ function renderLogoAssignmentHover(failed = false) {
   upcoming.forEach(item => {
     const link = document.createElement(item.url ? "a" : "div");
     link.className = "branch-assignment-hover-item";
+    if (item.type === "school-calendar") {
+      link.classList.add("school-calendar-event");
+    }
     if (item.url) {
       link.href = item.url;
       link.target = "_blank";
@@ -2002,3 +2005,33 @@ if (document.readyState !== "loading") initializeMicrosoft365();
 
 // Load the shared School Calendar independently of Microsoft/Google sign-in.
 loadSchoolCalendar();
+
+
+// School Calendar visual distinction: green cards inside the center weekly view.
+(function addSchoolCalendarEventStyles() {
+  if (document.getElementById("branchSchoolCalendarEventStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "branchSchoolCalendarEventStyles";
+  style.textContent = `
+    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event {
+      background: rgba(104, 151, 112, .88) !important;
+      border-color: rgba(185, 218, 183, .55) !important;
+    }
+
+    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event:hover {
+      background: rgba(113, 164, 121, .96) !important;
+    }
+
+    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
+    .branch-assignment-hover-source {
+      color: #eef8e9 !important;
+    }
+
+    #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
+    .branch-assignment-hover-due {
+      color: #fff3bd !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
