@@ -2280,7 +2280,7 @@ async function loadAfterschoolToday(){
     let html=`
       <div class="ase-duty-card">
         <div class="ase-duty-icon" aria-hidden="true">👥</div>
-        <div class="ase-duty-name">${duty || "Duty not listed"}</div>
+        <div class="ase-duty-name"><strong>LT On Duty:</strong> ${duty || "Not listed"}</div>
       </div>
       <div class="ase-section-title">
         <span aria-hidden="true">📘</span>
@@ -2323,3 +2323,5 @@ async function loadAfterschoolToday(){
 
 loadAfterschoolToday();
 
+
+console.log("TBS Staff Dashboard app version: ASE v45");
