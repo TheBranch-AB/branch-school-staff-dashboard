@@ -601,6 +601,25 @@
     }
   </style>
 
+
+<style id="fullCircleCenterLogoOverride">
+  .hero .badge-stage .logo-shell {
+    overflow: hidden !important;
+    border-radius: 50% !important;
+  }
+
+  .hero .badge-stage .logo-shell > img.portal-badge {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 50% !important;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -670,7 +689,7 @@
       <div class="badge-stage" tabindex="0">
         <div class="logo-shell">
           <img
-            src="assets/staff-dashboard-center-logo.png?v=20260903-v1"
+            src="assets/staff-dashboard-center-logo.png?v=20260903-full-circle-v1"
             class="portal-badge"
             alt="The Branch School Staff Dashboard"
           >
