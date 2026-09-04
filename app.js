@@ -1292,6 +1292,9 @@ function renderLogoAssignmentHover(failed = false) {
     link.className = "branch-assignment-hover-item";
     if (item.type === "school-calendar") {
       link.classList.add("school-calendar-event");
+      // Inline values make the distinction survive any older stylesheet rules.
+      link.style.background = "rgba(76, 132, 86, .92)";
+      link.style.borderColor = "rgba(178, 215, 178, .58)";
     }
     if (item.url) {
       link.href = item.url;
@@ -2024,7 +2027,7 @@ loadSchoolCalendar();
     }
 
     #branchAssignmentHover .branch-assignment-hover-item.school-calendar-event
-    .branch-assignment-hover-source {
+    .branch-assignment-hover-course {
       color: #eef8e9 !important;
     }
 
