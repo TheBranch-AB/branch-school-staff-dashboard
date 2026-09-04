@@ -202,7 +202,7 @@ async function loadAnnouncements(){
   }
 }
 
-loadAnnouncements();
+// Announcements tile is now used for Afterschool; do not load announcement content here.
 
 
 function decodeGoogleCredential(token) {
@@ -2192,3 +2192,85 @@ loadSchoolCalendar();
   `;
   document.head.appendChild(style);
 })();
+
+
+
+// ===== Afterschool Enrichment Google Sheet =====
+const AFTERSCHOOL_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?output=csv';
+
+function csvRows(text){
+  const rows=[];
+  let row=[], cell="", quoted=false;
+  for(let i=0;i<text.length;i++) {
+    const c=text[i], n=text[i+1];
+    if(c === '"') {
+      if(quoted && n === '"') { cell += '"'; i++; }
+      else quoted = !quoted;
+    } else if(c === "," && !quoted) {
+      row.push(cell); cell="";
+    } else if((c === "\n" || c === "\r") && !quoted) {
+      if(c === "\r" && n === "\n") i++;
+      row.push(cell); cell="";
+      if(row.some(v=>v.trim() !== "")) rows.push(row);
+      row=[];
+    } else {
+      cell += c;
+    }
+  }
+  row.push(cell);
+  if(row.some(v=>v.trim() !== "")) rows.push(row);
+  return rows;
+}
+
+async function loadAfterschoolToday(){
+  const host=document.getElementById("afterschoolToday");
+  if(!host) return;
+  const status=host.querySelector(".afterschool-status");
+  try {
+    const res=await fetch(AFTERSCHOOL_CSV_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows=csvRows(await res.text());
+    if(rows.length < 2) throw new Error("No rows");
+
+    const headers=rows[0].map(h=>h.trim().toLowerCase());
+    const dayI=headers.indexOf("day");
+    const classI=headers.indexOf("afterschool enrichment");
+    const gradesI=headers.indexOf("grades");
+    const timeI=headers.indexOf("time");
+    const dutyI=headers.indexOf("afterschool lt duty");
+
+    if(dayI < 0 || classI < 0) throw new Error("Required columns missing");
+
+    const today=new Intl.DateTimeFormat("en-US", {weekday:"long", timeZone:"America/Chicago"}).format(new Date());
+    const items=rows.slice(1).filter(r => (r[dayI]||"").trim().toLowerCase() === today.toLowerCase());
+
+    if(!items.length) {
+      status.innerHTML = `<div>No enrichment scheduled for ${today}.</div>`;
+      return;
+    }
+
+    const duty = dutyI >= 0
+      ? ((items.find(r => (r[dutyI]||"").trim()) || [])[dutyI] || "").trim()
+      : "";
+
+    const dutyHtml = duty
+      ? `<div class="afterschool-class"><strong>On Duty: ${duty}</strong></div>`
+      : `<div class="afterschool-class"><strong>On Duty: Not listed</strong></div>`;
+
+    const enrichmentHtml = items.map(r => {
+      const name=(r[classI]||"").trim();
+      if(!name) return "";
+      const grades=gradesI >= 0 ? (r[gradesI]||"").trim() : "";
+      const time=timeI >= 0 ? (r[timeI]||"").trim() : "";
+      const meta=[grades ? `Grades ${grades}` : "", time].filter(Boolean).join(" • ");
+      return `<div class="afterschool-class"><strong>${name}</strong>${meta ? `<div class="afterschool-meta">${meta}</div>` : ""}</div>`;
+    }).join("");
+
+    status.innerHTML = dutyHtml + enrichmentHtml;
+  } catch(err) {
+    console.error("Afterschool schedule failed:", err);
+    status.textContent="Afterschool schedule is temporarily unavailable.";
+  }
+}
+
+loadAfterschoolToday();
