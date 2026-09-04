@@ -1265,22 +1265,15 @@ function renderLogoAssignmentHover(failed = false) {
   }
 
   const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
 
+  // getWeekScheduleItems() is already limited to the current Monday-Friday
+  // school week. Show the entire week here, including events from earlier days,
+  // and let the center list scroll when there are more items than fit.
   const upcoming = getWeekScheduleItems()
     .filter(item => {
       if (!item.sortDate || Number.isNaN(item.sortDate.getTime())) return false;
-
-      // School Calendar all-day events should remain visible for the entire day,
-      // even after noon/midnight. Personal timed events disappear after they pass.
-      if (item.type === "school-calendar") {
-        return item.sortDate >= todayStart;
-      }
-
-      return item.type === "calendar" && item.sortDate >= now;
-    })
-    .slice(0, 20);
+      return item.type === "school-calendar" || item.type === "calendar";
+    });
 
   if (subtitle) {
     subtitle.textContent = "School Calendar + My Calendar";
@@ -1289,7 +1282,7 @@ function renderLogoAssignmentHover(failed = false) {
   if (!upcoming.length) {
     const empty = document.createElement("div");
     empty.className = "branch-assignment-hover-empty";
-    empty.textContent = "No more calendar events are scheduled this week.";
+    empty.textContent = "No calendar events are scheduled this week.";
     list.appendChild(empty);
     return;
   }
