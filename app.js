@@ -1906,7 +1906,7 @@ async function loadMicrosoft365Data(interactive = false) {
   const messagesPath =
     "/me/mailFolders/inbox/messages" +
     "?$select=subject,from,receivedDateTime,webLink,isRead" +
-    "&$filter=isRead%20eq%20false&$top=50";
+    "&$orderby=receivedDateTime%20desc&$top=12";
 
   try {
     const [profile, calendar, inbox, messages] = await Promise.all([
@@ -1932,11 +1932,11 @@ async function loadMicrosoft365Data(interactive = false) {
       loadMicrosoftProfilePhoto(token);
     }
 
-    const unreadMessages = Array.isArray(messages?.value) ? messages.value : [];
-    unreadMessages.sort((a, b) =>
+    const latestMessages = Array.isArray(messages?.value) ? messages.value : [];
+    latestMessages.sort((a, b) =>
       new Date(b?.receivedDateTime || 0) - new Date(a?.receivedDateTime || 0)
     );
-    renderMicrosoftInbox(inbox, unreadMessages);
+    renderMicrosoftInbox(inbox, latestMessages);
     setMicrosoftStatus("Exchange calendar + inbox connected.");
     updateMicrosoftButton();
 
@@ -1971,8 +1971,7 @@ function renderMicrosoftInbox(inbox, messages, failed = false) {
     return;
   }
 
-  const unread = Number(inbox?.unreadItemCount || 0);
-  countEl.textContent = unread.toLocaleString();
+  countEl.textContent = "Latest";
 
   listEl.innerHTML = "";
   if (!messages.length) {
@@ -2324,4 +2323,43 @@ async function loadAfterschoolToday(){
 loadAfterschoolToday();
 
 
-console.log("TBS Staff Dashboard app version: ASE v45");
+
+
+/* ===== Microsoft 365 automatic refresh =====
+   Refreshes Outlook inbox/calendar without requiring the user to sign in again.
+   Also refreshes when the dashboard tab becomes active again. */
+let branchMicrosoftRefreshInProgress = false;
+let branchMicrosoftLastRefresh = 0;
+const BRANCH_MICROSOFT_REFRESH_MS = 2 * 60 * 1000; // every 2 minutes
+
+async function refreshBranchMicrosoft365(force = false) {
+  const now = Date.now();
+
+  if (branchMicrosoftRefreshInProgress) return;
+  if (!force && (now - branchMicrosoftLastRefresh) < 30000) return;
+
+  branchMicrosoftRefreshInProgress = true;
+  try {
+    await loadMicrosoft365Data(false);
+    branchMicrosoftLastRefresh = Date.now();
+  } catch (error) {
+    console.warn("Automatic Microsoft 365 refresh skipped:", error);
+  } finally {
+    branchMicrosoftRefreshInProgress = false;
+  }
+}
+
+setInterval(() => {
+  if (!document.hidden) refreshBranchMicrosoft365(false);
+}, BRANCH_MICROSOFT_REFRESH_MS);
+
+window.addEventListener("focus", () => {
+  refreshBranchMicrosoft365(false);
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshBranchMicrosoft365(false);
+});
+
+console.log("TBS Staff Dashboard app version: v53 auto-refresh email");
+
