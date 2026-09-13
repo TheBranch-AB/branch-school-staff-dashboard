@@ -1,3 +1,9 @@
+// Google auth cleanup v60
+try {
+  sessionStorage.removeItem("branchStaffDashboardGoogleDataToken");
+  localStorage.removeItem("branchStaffDashboardGoogleDataTokenPersistent");
+} catch (_) {}
+
 function updateDateTime(){
   const now=new Date();
   const dateText=new Intl.DateTimeFormat(undefined,{
@@ -21,8 +27,8 @@ function prettifyNameFromEmail(email){
     .join(" ");
 }
 
-// Website version: Google identity will be populated after OAuth is connected.
-function setStudentInfo(name="Staff Member", email="Google sign-in not connected yet"){
+// Staff identity is populated from Microsoft 365 / Exchange.
+function setStudentInfo(name="Staff Member", email="Microsoft 365 not connected yet"){
   document.getElementById("studentName").textContent = name;
   document.getElementById("studentEmail").textContent = email;
 
@@ -34,7 +40,7 @@ function setStudentInfo(name="Staff Member", email="Google sign-in not connected
   document.getElementById("accountStatus").textContent =
     email && email.toLowerCase().endsWith("@thebranchschool.org") ? "Branch staff" : "Not connected";
 }
-setStudentInfo("Staff Member", "Waiting for Google sign-in...");
+setStudentInfo("Staff Member", "Waiting for Microsoft 365...");
 
 function parseCsv(text){
   const rows=[];
@@ -205,20 +211,6 @@ async function loadAnnouncements(){
 // Announcements tile is now used for Afterschool; do not load announcement content here.
 
 
-function decodeGoogleCredential(token) {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join("")
-  );
-
-  return JSON.parse(jsonPayload);
-}
-
 function saveSignedInUser(name, email) {
   localStorage.setItem(
     "branchStaffDashboardUser",
@@ -229,95 +221,21 @@ function saveSignedInUser(name, email) {
 function restoreSignedInUser() {
   const savedUser = localStorage.getItem("branchStaffDashboardUser");
   if (!savedUser) return false;
-
   try {
     const user = JSON.parse(savedUser);
-    const allowedDomain =
-      (window.PORTAL_CONFIG?.allowedDomain || "thebranchschool.org").toLowerCase();
-
-    if (!user?.email ||
-        !user.email.toLowerCase().endsWith("@" + allowedDomain)) {
+    const allowedDomain = (window.PORTAL_CONFIG?.allowedDomain || "thebranchschool.org").toLowerCase();
+    if (!user?.email || !user.email.toLowerCase().endsWith("@" + allowedDomain)) {
       localStorage.removeItem("branchStaffDashboardUser");
       return false;
     }
-
     setStudentInfo(user.name || "Staff Member", user.email);
     document.getElementById("accountStatus").textContent = "Branch staff";
     return true;
   } catch (error) {
-    console.warn("Could not restore saved student profile:", error);
     localStorage.removeItem("branchStaffDashboardUser");
     return false;
   }
 }
-
-function handleGoogleSignIn(response) {
-  try {
-    const user = decodeGoogleCredential(response.credential);
-    const email = user.email || "";
-    const name = user.name || "Staff Member";
-    const allowedDomain =
-      (window.PORTAL_CONFIG?.allowedDomain || "thebranchschool.org").toLowerCase();
-
-    if (!email.toLowerCase().endsWith("@" + allowedDomain)) {
-      document.getElementById("accountStatus").textContent =
-        "School account required";
-      return;
-    }
-
-    setStudentInfo(name, email);
-    document.getElementById("accountStatus").textContent = "Branch staff";
-    saveSignedInUser(name, email);
-  } catch (error) {
-    console.error("Google sign-in failed:", error);
-  }
-}
-
-function ensureGoogleIdentityServicesScript() {
-  if (window.google?.accounts) return;
-  if (document.querySelector('script[data-branch-google-gsi]') ||
-      document.querySelector('script[src*="accounts.google.com/gsi/client"]')) return;
-
-  const script = document.createElement("script");
-  script.src = "https://accounts.google.com/gsi/client";
-  script.async = true;
-  script.defer = true;
-  script.dataset.branchGoogleGsi = "true";
-  script.onerror = () => {
-    console.error("Could not load Google Identity Services.");
-    const status = document.getElementById("accountStatus");
-    if (status) status.textContent = "Google sign-in unavailable";
-  };
-  document.head.appendChild(script);
-}
-
-ensureGoogleIdentityServicesScript();
-
-function initializeGoogleSignIn() {
-  const clientId = window.PORTAL_CONFIG?.googleClientId || "";
-
-  if (!clientId) {
-    console.error("Google OAuth Client ID is missing.");
-    return;
-  }
-
-  if (!window.google?.accounts?.id) {
-    setTimeout(initializeGoogleSignIn, 250);
-    return;
-  }
-
-  google.accounts.id.initialize({
-    client_id: clientId,
-    callback: handleGoogleSignIn,
-    auto_select: true
-  });
-
-  if (!restoreSignedInUser()) {
-    google.accounts.id.prompt();
-  }
-}
-
-initializeGoogleSignIn();
 
 let calendarTokenClient = null;
 let calendarAccessToken = "";
@@ -416,35 +334,12 @@ function initializeCalendarAuth() {
 
   if (!clientId) return;
 
-  if (!window.google?.accounts?.oauth2) {
+  if (!false && window.google?.accounts?.oauth2) {
     setTimeout(initializeCalendarAuth, 250);
     return;
   }
 
-  calendarTokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: [
-      "https://www.googleapis.com/auth/calendar.events.readonly",
-      "https://www.googleapis.com/auth/calendar.readonly"
-    ].join(" "),
-    callback: async tokenResponse => {
-      if (tokenResponse.error) {
-        console.error("Google data authorization failed:", tokenResponse);
-        return;
-      }
-
-      calendarAccessToken = tokenResponse.access_token || "";
-      classroomAccessToken = tokenResponse.access_token || "";
-      saveGoogleDataToken(tokenResponse);
-
-      await Promise.allSettled([
-        loadWeekdayCalendar()
-      ]);
-      renderMiniWeekCalendar();
-      renderLogoAssignmentHover();
-      updateGoogleHeaderButton();
-    }
-  });
+  calendarTokenClient = null;
 
   // If this tab already authorized Google data and the token is still valid,
   // rebuild the dashboard automatically without another click.
@@ -461,7 +356,7 @@ function initializeCalendarAuth() {
     // Try to populate the live week automatically after Google Identity Services
     // has finished initializing. This is intentionally no-prompt: if the browser
     // or Google requires a user gesture, the Connect button remains as fallback.
-    setTimeout(autoRequestGoogleDataAccess, 350);
+    /* Google auto-authorization removed. */
   }
 }
 
@@ -1636,7 +1531,7 @@ function wireCalendarButton() {
   scheduleBtn.addEventListener("click", handleCalendarButtonClick);
 }
 
-initializeCalendarAuth();
+/* Google Calendar OAuth removed; Exchange calendar is authoritative. */
 wireCalendarButton();
 renderMiniWeekCalendar();
 renderLogoAssignmentHover();
@@ -1657,45 +1552,6 @@ updateDailyQuote();
 
 
 
-
-function updateGoogleHeaderButton() {
-  const button = document.getElementById("branchGoogleConnect");
-  if (!button) return;
-
-  if (calendarAccessToken) {
-    button.textContent = "Google ✓";
-    button.classList.add("is-connected");
-  } else {
-    button.textContent = "Google";
-    button.classList.remove("is-connected");
-  }
-}
-
-function initializeGoogleHeaderButton() {
-  const button = document.getElementById("branchGoogleConnect");
-  if (!button || button.dataset.ready === "true") return;
-  button.dataset.ready = "true";
-
-  button.addEventListener("click", () => {
-    if (calendarAccessToken) return;
-
-    if (calendarTokenClient) {
-      try {
-        calendarTokenClient.requestAccessToken({ prompt: "" });
-      } catch (error) {
-        console.warn("Google connection needs interaction:", error);
-        try { google.accounts.id.prompt(); } catch (_) {}
-      }
-    } else {
-      try { google.accounts.id.prompt(); } catch (_) {}
-    }
-  });
-
-  updateGoogleHeaderButton();
-}
-
-document.addEventListener("DOMContentLoaded", initializeGoogleHeaderButton);
-if (document.readyState !== "loading") initializeGoogleHeaderButton();
 
 /* ===== Microsoft 365 / Exchange integration =====
    Delegated, read-only access:
@@ -2363,3 +2219,5 @@ document.addEventListener("visibilitychange", () => {
 
 console.log("TBS Staff Dashboard app version: v53 auto-refresh email");
 
+
+console.log("TBS Staff Dashboard v59: Microsoft/Exchange authentication only");
