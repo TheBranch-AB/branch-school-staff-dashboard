@@ -2422,7 +2422,7 @@ async function loadUpcomingBranchEvents(){
     const e=events[0];
     const d=branchEventDetailsByKey.get(branchEventKey(e.name,e.date))||{};
     const time=branchFormatFeedTime(d.time);
-    host.innerHTML=`<button class="event-announcement" type="button"><div class="event-announcement-date">NEXT EVENT • ${escapeHtml(branchFormatEventDate(e.sortDate))}${time?` • ${escapeHtml(time)}`:""}</div><div class="event-announcement-name">${escapeHtml(e.name)}</div><div class="event-announcement-meta">${escapeHtml([e.type,e.organizer].filter(Boolean).join(" • "))}</div></button>`;
+    host.innerHTML=`<button class="event-announcement" type="button"><div class="event-announcement-date">NEXT EVENT • ${escapeHtml(branchFormatEventDate(e.sortDate))}${time?` • ${escapeHtml(time)}`:""}</div><div class="event-announcement-name">${escapeHtml(e.name)}</div><div class="event-announcement-meta">${escapeHtml(e.organizer ? `Event Organizer: ${e.organizer}` : "Event Organizer")}</div></button>`;
     host.querySelector(".event-announcement")?.addEventListener("click",()=>openBranchEventModal(e));
   }catch(e){
     console.error("Upcoming events failed:",e);
