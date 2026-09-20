@@ -2051,7 +2051,7 @@ loadSchoolCalendar();
 
 
 // ===== Afterschool Enrichment Google Sheet =====
-const AFTERSCHOOL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?output=csv";
+const AFTERSCHOOL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?gid=1982621090&single=true&output=csv";
 
 function csvRows(text){
   const rows=[];
@@ -2383,3 +2383,5 @@ async function loadUpcomingBranchEvents(){
 }
 loadAfterschoolToday().then(loadUpcomingBranchEvents);
 console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
+
+console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
