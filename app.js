@@ -2096,7 +2096,17 @@ function aseIcon(name){
 async function loadAfterschoolToday(){
   const host=document.getElementById("afterschoolToday");
   if(!host) return;
-  host.innerHTML="Loading…";
+  // Build both independent announcement sections BEFORE either network request.
+  // This ensures an Afterschool feed failure cannot hide the Upcoming Event feed.
+  host.innerHTML=`
+    <div id="upcomingEvents" class="event-announcements-list"><div class="ase-empty">Loading upcoming event…</div></div>
+    <div class="ase-section-title">
+      <span aria-hidden="true">📘</span>
+      <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
+    </div>
+    <div id="aseTodayPrograms"><div class="ase-empty">Loading enrichment…</div></div>
+  `;
+  const asePrograms=host.querySelector("#aseTodayPrograms");
 
   try{
     const res=await fetch(AFTERSCHOOL_CSV_URL+"&_="+Date.now(),{cache:"no-store"});
@@ -2125,24 +2135,11 @@ async function loadAfterschoolToday(){
     const items=rows.slice(1).filter(r=>norm(r[dayI]) === norm(today));
 
     if(!items.length){
-      host.innerHTML=`
-        <div id="upcomingEvents" class="event-announcements-list"><div class="ase-empty">Loading upcoming event…</div></div>
-        <div class="ase-section-title">
-          <span aria-hidden="true">📘</span>
-          <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
-        </div>
-        <div class="ase-empty">No ASE programs are listed today.</div>
-      `;
+      asePrograms.innerHTML=`<div class="ase-empty">No ASE programs are listed today.</div>`;
       return;
     }
 
-    let html=`
-      <div id="upcomingEvents" class="event-announcements-list"><div class="ase-empty">Loading upcoming event…</div></div>
-      <div class="ase-section-title">
-        <span aria-hidden="true">📘</span>
-        <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
-      </div>
-    `;
+    let html="";
 
     const enrichment=classI >= 0
       ? items.filter(r=>String(r[classI]||"").trim())
@@ -2169,11 +2166,11 @@ async function loadAfterschoolToday(){
       html += `<div class="ase-empty">No ASE programs are listed today.</div>`;
     }
 
-    host.innerHTML=html;
+    asePrograms.innerHTML=html;
 
   }catch(err){
     console.error("Afterschool schedule failed:",err);
-    host.innerHTML=`<div class="ase-empty">Afterschool information is temporarily unavailable.</div>`;
+    asePrograms.innerHTML=`<div class="ase-empty">Afterschool information is temporarily unavailable.</div>`;
   }
 }
 
@@ -2381,7 +2378,12 @@ async function loadUpcomingBranchEvents(){
     host.innerHTML='<div class="ase-empty">Upcoming events are temporarily unavailable.</div>';
   }
 }
-loadAfterschoolToday().then(loadUpcomingBranchEvents);
+// Load both feeds independently. Neither one can block or erase the other.
+Promise.allSettled([
+  loadAfterschoolToday(),
+  loadUpcomingBranchEvents()
+]);
 console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
 
 console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
+console.log("TBS Staff Dashboard v65: independent Next Event + ASE feeds");
