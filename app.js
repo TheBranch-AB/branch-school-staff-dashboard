@@ -1553,6 +1553,40 @@ updateDailyQuote();
 
 
 
+/* ===== Staff-only announcements privacy gate v66 ===== */
+let branchStaffAnnouncementsUnlocked = false;
+
+function renderStaffAnnouncementsLocked(message = "Sign in with Microsoft 365 to view staff announcements.") {
+  const host = document.getElementById("afterschoolToday");
+  if (!host) return;
+  host.innerHTML = `
+    <div class="ase-empty" style="display:flex;align-items:center;gap:8px;">
+      <span aria-hidden="true">🔒</span>
+      <span>${escapeHtml(message)}</span>
+    </div>`;
+}
+
+function isVerifiedBranchStaffEmail(email) {
+  return String(email || "").trim().toLowerCase().endsWith("@thebranchschool.org");
+}
+
+async function unlockStaffAnnouncementsFor(email) {
+  if (!isVerifiedBranchStaffEmail(email)) {
+    branchStaffAnnouncementsUnlocked = false;
+    renderStaffAnnouncementsLocked("Branch School staff sign-in is required.");
+    return false;
+  }
+  if (branchStaffAnnouncementsUnlocked) return true;
+  branchStaffAnnouncementsUnlocked = true;
+  await Promise.allSettled([
+    loadAfterschoolToday(),
+    loadUpcomingBranchEvents()
+  ]);
+  return true;
+}
+
+renderStaffAnnouncementsLocked();
+
 /* ===== Microsoft 365 / Exchange integration =====
    Delegated, read-only access:
    User.Read + Calendars.Read + Mail.Read
@@ -1786,6 +1820,13 @@ async function loadMicrosoft365Data(interactive = false) {
 
       // User.Read already grants access to the signed-in user's profile photo.
       loadMicrosoftProfilePhoto(token);
+
+      // Only a Microsoft Graph-verified Branch School staff identity may load
+      // the internal Announcements / Next Event / ASE feeds.
+      await unlockStaffAnnouncementsFor(email);
+    } else {
+      branchStaffAnnouncementsUnlocked = false;
+      renderStaffAnnouncementsLocked("Branch School staff sign-in is required.");
     }
 
     const latestMessages = Array.isArray(messages?.value) ? messages.value : [];
@@ -2096,6 +2137,7 @@ function aseIcon(name){
 async function loadAfterschoolToday(){
   const host=document.getElementById("afterschoolToday");
   if(!host) return;
+  if(!branchStaffAnnouncementsUnlocked){ renderStaffAnnouncementsLocked(); return; }
   // Build both independent announcement sections BEFORE either network request.
   // This ensures an Afterschool feed failure cannot hide the Upcoming Event feed.
   host.innerHTML=`
@@ -2335,6 +2377,7 @@ function openBranchEventModal(event){
   modal.classList.add("is-open");modal.setAttribute("aria-hidden","false");
 }
 async function loadUpcomingBranchEvents(){
+  if(!branchStaffAnnouncementsUnlocked) return;
   const host=document.getElementById("upcomingEvents"); if(!host)return;
   host.innerHTML='<div class="ase-empty">Loading upcoming event…</div>';
   try{
@@ -2378,12 +2421,12 @@ async function loadUpcomingBranchEvents(){
     host.innerHTML='<div class="ase-empty">Upcoming events are temporarily unavailable.</div>';
   }
 }
-// Load both feeds independently. Neither one can block or erase the other.
-Promise.allSettled([
-  loadAfterschoolToday(),
-  loadUpcomingBranchEvents()
-]);
+// Privacy v66: do NOT fetch staff announcements on public page load.
+// Microsoft Graph verification calls unlockStaffAnnouncementsFor() after login.
+renderStaffAnnouncementsLocked();
 console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
 
 console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
 console.log("TBS Staff Dashboard v65: independent Next Event + ASE feeds");
+
+console.log("TBS Staff Dashboard v66: announcements locked until verified Microsoft 365 staff login");
