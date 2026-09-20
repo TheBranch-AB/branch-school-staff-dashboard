@@ -2219,17 +2219,15 @@ console.log("TBS Staff Dashboard app version: v53 auto-refresh email");
 
 console.log("TBS Staff Dashboard v59: Microsoft/Exchange authentication only");
 
-/* ===== v61 Upcoming Events + Event Details popup ===== */
-const BRANCH_EVENT_SHEET_ID = "1WXVMsfjlhw4fjQTKTUqqmG9gRCSkteNQyzfZFAxv8mU";
-const BRANCH_ANNUAL_CALENDAR_CSV = `https://docs.google.com/spreadsheets/d/${BRANCH_EVENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("Annual Calendar")}`;
-const BRANCH_EVENT_RESPONSES_CSV = `https://docs.google.com/spreadsheets/d/${BRANCH_EVENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("Form Responses 3")}`;
+/* ===== v63 Upcoming Events + Event Details popup ===== */
+const BRANCH_EVENT_FEED_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh_h36wS29zGwdFGtO2L5Equ-u-cOiCdVLn_W2lCGtHUlAbfNMA2I15EOk7C7iB0HTsETlfLM9RjwW/pub?gid=2131748303&single=true&output=csv";
 let branchEventDetailsByKey = new Map();
 
 function branchEventKey(name,date){
   return `${String(name||"").trim().toLowerCase()}|${String(date||"").trim()}`;
 }
 function branchHeaderIndex(headers,...names){
-  const normalized=headers.map(h=>String(h||"").trim().toLowerCase());
+  const normalized=headers.map(h=>String(h||"").replace(/^\uFEFF/,"").trim().toLowerCase());
   for(const name of names){
     const i=normalized.indexOf(String(name).trim().toLowerCase());
     if(i>=0) return i;
@@ -2237,13 +2235,37 @@ function branchHeaderIndex(headers,...names){
   return -1;
 }
 function branchParseMDY(value){
-  const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(value||"").trim());
-  if(!m) return null;
-  const d=new Date(Number(m[3]),Number(m[1])-1,Number(m[2]),12,0,0,0);
+  const raw=String(value||"").trim();
+  let m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(raw);
+  if(m){
+    const d=new Date(Number(m[3]),Number(m[1])-1,Number(m[2]),12,0,0,0);
+    return Number.isNaN(d.getTime())?null:d;
+  }
+  m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(raw);
+  if(m){
+    const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0,0);
+    return Number.isNaN(d.getTime())?null:d;
+  }
+  const d=new Date(raw);
   return Number.isNaN(d.getTime())?null:d;
 }
 function branchFormatEventDate(d){
   return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:d.getFullYear()!==new Date().getFullYear()?"numeric":undefined});
+}
+function branchFormatFeedTime(value){
+  const raw=String(value||"").trim();
+  if(!raw) return "";
+  const clock=raw.match(/(?:\d{1,2}\/\d{1,2}\/\d{4}\s+)?(\d{1,2}):(\d{2})(?::\d{2})?(?:\s*([AP]M))?/i);
+  if(!clock) return raw;
+  let hour=Number(clock[1]);
+  const minute=clock[2];
+  const ampm=(clock[3]||"").toUpperCase();
+  if(ampm){
+    return `${hour}:${minute} ${ampm}`;
+  }
+  const suffix=hour>=12?"PM":"AM";
+  hour=hour%12||12;
+  return `${hour}:${minute} ${suffix}`;
 }
 function branchCleanNeeded(v){
   const s=String(v||"").trim();
@@ -2274,67 +2296,85 @@ function eventDetail(label,value,wide=false){
   if(!v) return "";
   return `<div class="event-detail${wide?" wide":""}"><div class="event-detail-label">${escapeHtml(label)}</div><div class="event-detail-value">${escapeHtml(v)}</div></div>`;
 }
+function branchNeededLabels(details){
+  return [
+    ["Bear Facts",details.bearFacts],
+    ["Website",details.website],
+    ["Social Media",details.socialMedia],
+    ["Calendar",details.calendar],
+    ["Email Blast",details.emailBlast],
+    ["Digital Signage",details.digitalSignage],
+    ["Room Parent",details.roomParent],
+    ["Other",details.otherCommunication]
+  ].filter(([,v])=>/^needed$/i.test(String(v||"").trim())).map(([label])=>label).join(", ") || "None listed";
+}
 function openBranchEventModal(event){
   const modal=ensureBranchEventModal();
   const details=branchEventDetailsByKey.get(branchEventKey(event.name,event.date))||{};
   document.getElementById("branchEventModalTitle").textContent=event.name;
   document.getElementById("branchEventModalBody").innerHTML=[
-    eventDetail("Date",event.date), eventDetail("Time",details.time),
+    eventDetail("Date",event.date), eventDetail("Time",branchFormatFeedTime(details.time)),
     eventDetail("Organizer",event.organizer), eventDetail("Event Type",event.type),
     eventDetail("Location",details.location,true), eventDetail("Audience",details.audience,true),
-    eventDetail("Expected Attendance",details.attendance), eventDetail("Status",event.status||"Scheduled"),
-    eventDetail("Communications",details.communications,true),
-    eventDetail("Facilities Support",details.facilities), eventDetail("IT Support",details.it),
-    eventDetail("Security",details.security), eventDetail("Nurse Support",details.nurse),
-    eventDetail("Photography",details.photo), eventDetail("Volunteers",details.volunteers),
-    eventDetail("Head of School Approval",details.hosApproval), eventDetail("Budget Approval",details.budgetApproval)
+    eventDetail("Expected Attendance",details.attendance),
+    eventDetail("Communications",branchNeededLabels(details),true),
+    eventDetail("Facilities Support",branchCleanNeeded(details.facilities)),
+    eventDetail("Facilities Needs",details.facilitiesNeeds,true),
+    eventDetail("Facilities Details",details.facilitiesDetails,true),
+    eventDetail("IT Support",branchCleanNeeded(details.it)),
+    eventDetail("IT Needs",details.itNeeds,true),
+    eventDetail("IT Details",details.itDetails,true),
+    eventDetail("Security",branchCleanNeeded(details.security)),
+    eventDetail("Nurse Support",branchCleanNeeded(details.nurse)),
+    eventDetail("Photography",branchCleanNeeded(details.photo)),
+    eventDetail("Volunteers",details.volunteers),
+    eventDetail("Number of Volunteers",details.volunteerCount),
+    eventDetail("Volunteer Duties",details.volunteerDuties,true),
+    eventDetail("Leadership Team",details.leadership),
+    eventDetail("Administration",details.administration),
+    eventDetail("Faculty",details.faculty),
+    eventDetail("Other Staff",details.otherStaff)
   ].join("");
   modal.classList.add("is-open");modal.setAttribute("aria-hidden","false");
 }
-async function loadBranchEventDetails(){
-  try{
-    const res=await fetch(BRANCH_EVENT_RESPONSES_CSV+`&_=${Date.now()}`,{cache:"no-store"});
-    if(!res.ok) throw new Error(`Event details HTTP ${res.status}`);
-    const rows=csvRows(await res.text()); if(rows.length<2)return;
-    const h=rows[0]; const i=(...n)=>branchHeaderIndex(h,...n);
-    const nameI=i("Event Name"), dateI=i("Proposed Event Date"), orgI=i("Event Organizer"), typeI=i("Event Type");
-    const timeI=i("Proposed Event Time"), locI=i("Location (choose all that apply)"), audienceI=i("Target Audience"), attendanceI=i("Expected Attendance");
-    const facilitiesI=i("Do you require support from Maintenance/Facilities?"), itI=i("Do your require IT support?","Do you require IT support?");
-    const securityI=i("Do you require hired security for this event?"), nurseI=i("Do you require nurse assistance during your event?"), photoI=i("Do you want support with photographing your event?");
-    const volunteersI=i("Volunteers Needed"), volunteerNumI=i("Number of Volunteers Needed"), hosI=i("Is Head of School Approval Needed?"), budgetI=i("Is Budget Approval Needed?");
-    const commNames=["What forms of communications are needed? [Bear Facts]","What forms of communications are needed? [Website]","What forms of communications are needed? [Social Media]","What forms of communications are needed? [Calendar]","What forms of communications are needed? [Email Blast]","What forms of communications are needed? [Digital Signage]","What forms of communications are needed? [Room Parent Communication]","What forms of communications are needed? [Other]"];
-    const commLabels=["Bear Facts","Website","Social Media","Calendar","Email Blast","Digital Signage","Room Parent","Other"];
-    const commIdx=commNames.map(x=>i(x));
-    rows.slice(1).forEach(r=>{
-      const name=nameI>=0?r[nameI]:"", date=dateI>=0?r[dateI]:""; if(!name||!date)return;
-      const communications=commIdx.map((ci,x)=>ci>=0&&/^needed$/i.test(String(r[ci]||"").trim())?commLabels[x]:"").filter(Boolean).join(", ");
-      const volunteerText=volunteersI>=0?String(r[volunteersI]||"").trim():"";
-      const volunteerNum=volunteerNumI>=0?String(r[volunteerNumI]||"").trim():"";
-      branchEventDetailsByKey.set(branchEventKey(name,date),{
-        time:timeI>=0?r[timeI]:"", location:locI>=0?r[locI]:"", audience:audienceI>=0?r[audienceI]:"", attendance:attendanceI>=0?r[attendanceI]:"",
-        communications:communications||"None listed", facilities:facilitiesI>=0?branchCleanNeeded(r[facilitiesI]):"", it:itI>=0?branchCleanNeeded(r[itI]):"",
-        security:securityI>=0?branchCleanNeeded(r[securityI]):"", nurse:nurseI>=0?branchCleanNeeded(r[nurseI]):"", photo:photoI>=0?branchCleanNeeded(r[photoI]):"",
-        volunteers:[volunteerText,volunteerNum?`${volunteerNum} requested`:""].filter(Boolean).join(" • "), hosApproval:hosI>=0?r[hosI]:"", budgetApproval:budgetI>=0?r[budgetI]:"",
-        organizer:orgI>=0?r[orgI]:"", type:typeI>=0?r[typeI]:""
-      });
-    });
-  }catch(e){console.warn("Event detail feed unavailable:",e);}
-}
 async function loadUpcomingBranchEvents(){
   const host=document.getElementById("upcomingEvents"); if(!host)return;
-  host.innerHTML='<div class="ase-empty">Loading upcoming events…</div>';
+  host.innerHTML='<div class="ase-empty">Loading upcoming event…</div>';
   try{
-    await loadBranchEventDetails();
-    const res=await fetch(BRANCH_ANNUAL_CALENDAR_CSV+`&_=${Date.now()}`,{cache:"no-store"});
-    if(!res.ok) throw new Error(`Annual Calendar HTTP ${res.status}`);
+    const sep=BRANCH_EVENT_FEED_CSV.includes("?")?"&":"?";
+    const res=await fetch(BRANCH_EVENT_FEED_CSV+`${sep}_=${Date.now()}`,{cache:"no-store"});
+    if(!res.ok) throw new Error(`Staff Event Feed HTTP ${res.status}`);
     const rows=csvRows(await res.text()); if(rows.length<2)throw new Error("No event rows");
     const h=rows[0], i=(...n)=>branchHeaderIndex(h,...n);
-    const dateI=i("Date"), nameI=i("Event"), orgI=i("Organizer"), typeI=i("Type"), statusI=i("Status");
+    const idI=i("Event ID"), nameI=i("Event Name"), typeI=i("Event Type"), orgI=i("Organizer"), dateI=i("Event Date"), timeI=i("Event Time"), locI=i("Location"), audienceI=i("Audience"), attendanceI=i("Expected Attendance");
+    if(nameI<0||dateI<0) throw new Error("Required event columns missing");
+    const cols={
+      bearFacts:i("Bear Facts"), website:i("Website"), socialMedia:i("Social Media"), calendar:i("Calendar"), emailBlast:i("Email Blast"), digitalSignage:i("Digital Signage"), roomParent:i("Room Parent Communication"), otherCommunication:i("Other Communication"),
+      facilities:i("Facilities Support"), it:i("IT Support"), security:i("Security"), nurse:i("Nurse"), photo:i("Photography"), facilitiesNeeds:i("Facilities Needs"), facilitiesDetails:i("Facilities Details"), itNeeds:i("IT Needs"), itDetails:i("IT Details"), leadership:i("Leadership Team"), administration:i("Administration"), faculty:i("Faculty"), otherStaff:i("Other Staff"), volunteers:i("Volunteers Needed"), volunteerCount:i("Number of Volunteers"), volunteerDuties:i("Volunteer Duties")
+    };
+    branchEventDetailsByKey=new Map();
     const today=new Date(); today.setHours(0,0,0,0);
-    const events=rows.slice(1).map(r=>({date:r[dateI]||"",name:r[nameI]||"",organizer:r[orgI]||"",type:r[typeI]||"",status:statusI>=0?r[statusI]||"":"",sortDate:branchParseMDY(r[dateI])})).filter(e=>e.name.trim()&&e.sortDate&&e.sortDate>=today&&!/^completed$/i.test(e.status)).sort((a,b)=>a.sortDate-b.sortDate);
+    const events=[];
+    rows.slice(1).forEach(r=>{
+      const name=String(r[nameI]||"").trim();
+      const date=String(r[dateI]||"").trim();
+      const sortDate=branchParseMDY(date);
+      if(!name||!date||!sortDate) return;
+      const event={id:idI>=0?r[idI]||"":"",name,date,type:typeI>=0?r[typeI]||"":"",organizer:orgI>=0?r[orgI]||"":"",sortDate};
+      const val=k=>cols[k]>=0?r[cols[k]]||"":"";
+      branchEventDetailsByKey.set(branchEventKey(name,date),{
+        time:timeI>=0?r[timeI]||"":"", location:locI>=0?r[locI]||"":"", audience:audienceI>=0?r[audienceI]||"":"", attendance:attendanceI>=0?r[attendanceI]||"":"",
+        bearFacts:val("bearFacts"), website:val("website"), socialMedia:val("socialMedia"), calendar:val("calendar"), emailBlast:val("emailBlast"), digitalSignage:val("digitalSignage"), roomParent:val("roomParent"), otherCommunication:val("otherCommunication"),
+        facilities:val("facilities"), it:val("it"), security:val("security"), nurse:val("nurse"), photo:val("photo"), facilitiesNeeds:val("facilitiesNeeds"), facilitiesDetails:val("facilitiesDetails"), itNeeds:val("itNeeds"), itDetails:val("itDetails"), leadership:val("leadership"), administration:val("administration"), faculty:val("faculty"), otherStaff:val("otherStaff"), volunteers:val("volunteers"), volunteerCount:val("volunteerCount"), volunteerDuties:val("volunteerDuties")
+      });
+      if(sortDate>=today) events.push(event);
+    });
+    events.sort((a,b)=>a.sortDate-b.sortDate);
     if(!events.length){host.innerHTML='<div class="ase-empty">No upcoming events are listed.</div>';return;}
     const e=events[0];
-    host.innerHTML=`<button class="event-announcement" type="button"><div class="event-announcement-date">NEXT EVENT • ${escapeHtml(branchFormatEventDate(e.sortDate))}</div><div class="event-announcement-name">${escapeHtml(e.name)}</div><div class="event-announcement-meta">${escapeHtml([e.type,e.organizer].filter(Boolean).join(" • "))} • Click for details</div></button>`;
+    const d=branchEventDetailsByKey.get(branchEventKey(e.name,e.date))||{};
+    const time=branchFormatFeedTime(d.time);
+    host.innerHTML=`<button class="event-announcement" type="button"><div class="event-announcement-date">NEXT EVENT • ${escapeHtml(branchFormatEventDate(e.sortDate))}${time?` • ${escapeHtml(time)}`:""}</div><div class="event-announcement-name">${escapeHtml(e.name)}</div><div class="event-announcement-meta">${escapeHtml([e.type,e.organizer].filter(Boolean).join(" • "))} • Click for details</div></button>`;
     host.querySelector(".event-announcement")?.addEventListener("click",()=>openBranchEventModal(e));
   }catch(e){
     console.error("Upcoming events failed:",e);
@@ -2342,4 +2382,4 @@ async function loadUpcomingBranchEvents(){
   }
 }
 loadAfterschoolToday().then(loadUpcomingBranchEvents);
-console.log("TBS Staff Dashboard v62: upcoming event replaces LT duty; ASE classes preserved");
+console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
