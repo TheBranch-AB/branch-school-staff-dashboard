@@ -2125,18 +2125,19 @@ async function loadAfterschoolToday(){
     const items=rows.slice(1).filter(r=>norm(r[dayI]) === norm(today));
 
     if(!items.length){
-      host.innerHTML=`<div class="ase-empty">No afterschool information is listed for ${today}.</div>`;
+      host.innerHTML=`
+        <div id="upcomingEvents" class="event-announcements-list"><div class="ase-empty">Loading upcoming event…</div></div>
+        <div class="ase-section-title">
+          <span aria-hidden="true">📘</span>
+          <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
+        </div>
+        <div class="ase-empty">No ASE programs are listed today.</div>
+      `;
       return;
     }
 
-    const dutyRow=dutyI >= 0 ? items.find(r=>String(r[dutyI]||"").trim()) : null;
-    const duty=dutyRow ? String(dutyRow[dutyI]||"").trim() : "";
-
     let html=`
-      <div class="ase-duty-card">
-        <div class="ase-duty-icon" aria-hidden="true">👥</div>
-        <div class="ase-duty-name"><strong>Afterschool LT:</strong> ${duty || "Not listed"}</div>
-      </div>
+      <div id="upcomingEvents" class="event-announcements-list"><div class="ase-empty">Loading upcoming event…</div></div>
       <div class="ase-section-title">
         <span aria-hidden="true">📘</span>
         <span><span class="ase-prefix">ASE:</span> TODAY'S ENRICHMENT</span>
@@ -2175,10 +2176,6 @@ async function loadAfterschoolToday(){
     host.innerHTML=`<div class="ase-empty">Afterschool information is temporarily unavailable.</div>`;
   }
 }
-
-loadAfterschoolToday();
-
-
 
 
 /* ===== Microsoft 365 automatic refresh =====
@@ -2221,3 +2218,128 @@ console.log("TBS Staff Dashboard app version: v53 auto-refresh email");
 
 
 console.log("TBS Staff Dashboard v59: Microsoft/Exchange authentication only");
+
+/* ===== v61 Upcoming Events + Event Details popup ===== */
+const BRANCH_EVENT_SHEET_ID = "1WXVMsfjlhw4fjQTKTUqqmG9gRCSkteNQyzfZFAxv8mU";
+const BRANCH_ANNUAL_CALENDAR_CSV = `https://docs.google.com/spreadsheets/d/${BRANCH_EVENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("Annual Calendar")}`;
+const BRANCH_EVENT_RESPONSES_CSV = `https://docs.google.com/spreadsheets/d/${BRANCH_EVENT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("Form Responses 3")}`;
+let branchEventDetailsByKey = new Map();
+
+function branchEventKey(name,date){
+  return `${String(name||"").trim().toLowerCase()}|${String(date||"").trim()}`;
+}
+function branchHeaderIndex(headers,...names){
+  const normalized=headers.map(h=>String(h||"").trim().toLowerCase());
+  for(const name of names){
+    const i=normalized.indexOf(String(name).trim().toLowerCase());
+    if(i>=0) return i;
+  }
+  return -1;
+}
+function branchParseMDY(value){
+  const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(value||"").trim());
+  if(!m) return null;
+  const d=new Date(Number(m[3]),Number(m[1])-1,Number(m[2]),12,0,0,0);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function branchFormatEventDate(d){
+  return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:d.getFullYear()!==new Date().getFullYear()?"numeric":undefined});
+}
+function branchCleanNeeded(v){
+  const s=String(v||"").trim();
+  if(!s) return "Not listed";
+  if(/^yes\b/i.test(s)||/^needed$/i.test(s)) return "Yes";
+  if(/^no\b/i.test(s)||/^not needed$/i.test(s)) return "No";
+  return s;
+}
+function ensureBranchEventModal(){
+  let modal=document.getElementById("branchEventDetailsModal");
+  if(modal) return modal;
+  modal=document.createElement("div");
+  modal.id="branchEventDetailsModal";
+  modal.setAttribute("aria-hidden","true");
+  modal.innerHTML=`<div class="event-modal-backdrop" data-event-close></div><section class="event-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="branchEventModalTitle"><button class="event-modal-close" type="button" aria-label="Close event details" data-event-close>×</button><div class="event-modal-kicker">Event Details</div><h2 id="branchEventModalTitle">Event</h2><div id="branchEventModalBody" class="event-detail-grid"></div></section>`;
+  document.body.appendChild(modal);
+  modal.querySelectorAll("[data-event-close]").forEach(el=>el.addEventListener("click",closeBranchEventModal));
+  document.addEventListener("keydown",e=>{if(e.key==="Escape") closeBranchEventModal();});
+  return modal;
+}
+function closeBranchEventModal(){
+  const m=document.getElementById("branchEventDetailsModal");
+  if(!m)return;
+  m.classList.remove("is-open");m.setAttribute("aria-hidden","true");
+}
+function eventDetail(label,value,wide=false){
+  const v=String(value??"").trim();
+  if(!v) return "";
+  return `<div class="event-detail${wide?" wide":""}"><div class="event-detail-label">${escapeHtml(label)}</div><div class="event-detail-value">${escapeHtml(v)}</div></div>`;
+}
+function openBranchEventModal(event){
+  const modal=ensureBranchEventModal();
+  const details=branchEventDetailsByKey.get(branchEventKey(event.name,event.date))||{};
+  document.getElementById("branchEventModalTitle").textContent=event.name;
+  document.getElementById("branchEventModalBody").innerHTML=[
+    eventDetail("Date",event.date), eventDetail("Time",details.time),
+    eventDetail("Organizer",event.organizer), eventDetail("Event Type",event.type),
+    eventDetail("Location",details.location,true), eventDetail("Audience",details.audience,true),
+    eventDetail("Expected Attendance",details.attendance), eventDetail("Status",event.status||"Scheduled"),
+    eventDetail("Communications",details.communications,true),
+    eventDetail("Facilities Support",details.facilities), eventDetail("IT Support",details.it),
+    eventDetail("Security",details.security), eventDetail("Nurse Support",details.nurse),
+    eventDetail("Photography",details.photo), eventDetail("Volunteers",details.volunteers),
+    eventDetail("Head of School Approval",details.hosApproval), eventDetail("Budget Approval",details.budgetApproval)
+  ].join("");
+  modal.classList.add("is-open");modal.setAttribute("aria-hidden","false");
+}
+async function loadBranchEventDetails(){
+  try{
+    const res=await fetch(BRANCH_EVENT_RESPONSES_CSV+`&_=${Date.now()}`,{cache:"no-store"});
+    if(!res.ok) throw new Error(`Event details HTTP ${res.status}`);
+    const rows=csvRows(await res.text()); if(rows.length<2)return;
+    const h=rows[0]; const i=(...n)=>branchHeaderIndex(h,...n);
+    const nameI=i("Event Name"), dateI=i("Proposed Event Date"), orgI=i("Event Organizer"), typeI=i("Event Type");
+    const timeI=i("Proposed Event Time"), locI=i("Location (choose all that apply)"), audienceI=i("Target Audience"), attendanceI=i("Expected Attendance");
+    const facilitiesI=i("Do you require support from Maintenance/Facilities?"), itI=i("Do your require IT support?","Do you require IT support?");
+    const securityI=i("Do you require hired security for this event?"), nurseI=i("Do you require nurse assistance during your event?"), photoI=i("Do you want support with photographing your event?");
+    const volunteersI=i("Volunteers Needed"), volunteerNumI=i("Number of Volunteers Needed"), hosI=i("Is Head of School Approval Needed?"), budgetI=i("Is Budget Approval Needed?");
+    const commNames=["What forms of communications are needed? [Bear Facts]","What forms of communications are needed? [Website]","What forms of communications are needed? [Social Media]","What forms of communications are needed? [Calendar]","What forms of communications are needed? [Email Blast]","What forms of communications are needed? [Digital Signage]","What forms of communications are needed? [Room Parent Communication]","What forms of communications are needed? [Other]"];
+    const commLabels=["Bear Facts","Website","Social Media","Calendar","Email Blast","Digital Signage","Room Parent","Other"];
+    const commIdx=commNames.map(x=>i(x));
+    rows.slice(1).forEach(r=>{
+      const name=nameI>=0?r[nameI]:"", date=dateI>=0?r[dateI]:""; if(!name||!date)return;
+      const communications=commIdx.map((ci,x)=>ci>=0&&/^needed$/i.test(String(r[ci]||"").trim())?commLabels[x]:"").filter(Boolean).join(", ");
+      const volunteerText=volunteersI>=0?String(r[volunteersI]||"").trim():"";
+      const volunteerNum=volunteerNumI>=0?String(r[volunteerNumI]||"").trim():"";
+      branchEventDetailsByKey.set(branchEventKey(name,date),{
+        time:timeI>=0?r[timeI]:"", location:locI>=0?r[locI]:"", audience:audienceI>=0?r[audienceI]:"", attendance:attendanceI>=0?r[attendanceI]:"",
+        communications:communications||"None listed", facilities:facilitiesI>=0?branchCleanNeeded(r[facilitiesI]):"", it:itI>=0?branchCleanNeeded(r[itI]):"",
+        security:securityI>=0?branchCleanNeeded(r[securityI]):"", nurse:nurseI>=0?branchCleanNeeded(r[nurseI]):"", photo:photoI>=0?branchCleanNeeded(r[photoI]):"",
+        volunteers:[volunteerText,volunteerNum?`${volunteerNum} requested`:""].filter(Boolean).join(" • "), hosApproval:hosI>=0?r[hosI]:"", budgetApproval:budgetI>=0?r[budgetI]:"",
+        organizer:orgI>=0?r[orgI]:"", type:typeI>=0?r[typeI]:""
+      });
+    });
+  }catch(e){console.warn("Event detail feed unavailable:",e);}
+}
+async function loadUpcomingBranchEvents(){
+  const host=document.getElementById("upcomingEvents"); if(!host)return;
+  host.innerHTML='<div class="ase-empty">Loading upcoming events…</div>';
+  try{
+    await loadBranchEventDetails();
+    const res=await fetch(BRANCH_ANNUAL_CALENDAR_CSV+`&_=${Date.now()}`,{cache:"no-store"});
+    if(!res.ok) throw new Error(`Annual Calendar HTTP ${res.status}`);
+    const rows=csvRows(await res.text()); if(rows.length<2)throw new Error("No event rows");
+    const h=rows[0], i=(...n)=>branchHeaderIndex(h,...n);
+    const dateI=i("Date"), nameI=i("Event"), orgI=i("Organizer"), typeI=i("Type"), statusI=i("Status");
+    const today=new Date(); today.setHours(0,0,0,0);
+    const events=rows.slice(1).map(r=>({date:r[dateI]||"",name:r[nameI]||"",organizer:r[orgI]||"",type:r[typeI]||"",status:statusI>=0?r[statusI]||"":"",sortDate:branchParseMDY(r[dateI])})).filter(e=>e.name.trim()&&e.sortDate&&e.sortDate>=today&&!/^completed$/i.test(e.status)).sort((a,b)=>a.sortDate-b.sortDate);
+    if(!events.length){host.innerHTML='<div class="ase-empty">No upcoming events are listed.</div>';return;}
+    const e=events[0];
+    host.innerHTML=`<button class="event-announcement" type="button"><div class="event-announcement-date">NEXT EVENT • ${escapeHtml(branchFormatEventDate(e.sortDate))}</div><div class="event-announcement-name">${escapeHtml(e.name)}</div><div class="event-announcement-meta">${escapeHtml([e.type,e.organizer].filter(Boolean).join(" • "))} • Click for details</div></button>`;
+    host.querySelector(".event-announcement")?.addEventListener("click",()=>openBranchEventModal(e));
+  }catch(e){
+    console.error("Upcoming events failed:",e);
+    host.innerHTML='<div class="ase-empty">Upcoming events are temporarily unavailable.</div>';
+  }
+}
+loadAfterschoolToday().then(loadUpcomingBranchEvents);
+console.log("TBS Staff Dashboard v62: upcoming event replaces LT duty; ASE classes preserved");
