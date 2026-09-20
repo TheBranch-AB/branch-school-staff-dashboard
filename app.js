@@ -2137,6 +2137,11 @@ function aseIcon(name){
 async function loadAfterschoolToday(){
   const host=document.getElementById("afterschoolToday");
   if(!host) return;
+  // FAIL CLOSED: no staff feed request before Microsoft Graph verification.
+  if(!branchStaffAnnouncementsUnlocked){
+    renderStaffAnnouncementsLocked();
+    return;
+  }
   if(!branchStaffAnnouncementsUnlocked){ renderStaffAnnouncementsLocked(); return; }
   // Build both independent announcement sections BEFORE either network request.
   // This ensures an Afterschool feed failure cannot hide the Upcoming Event feed.
@@ -2377,7 +2382,10 @@ function openBranchEventModal(event){
   modal.classList.add("is-open");modal.setAttribute("aria-hidden","false");
 }
 async function loadUpcomingBranchEvents(){
-  if(!branchStaffAnnouncementsUnlocked) return;
+  if(!branchStaffAnnouncementsUnlocked){
+    renderStaffAnnouncementsLocked();
+    return;
+  }
   const host=document.getElementById("upcomingEvents"); if(!host)return;
   host.innerHTML='<div class="ase-empty">Loading upcoming event…</div>';
   try{
@@ -2430,3 +2438,12 @@ console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
 console.log("TBS Staff Dashboard v65: independent Next Event + ASE feeds");
 
 console.log("TBS Staff Dashboard v66: announcements locked until verified Microsoft 365 staff login");
+// v67: re-assert the lock after DOM construction.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!branchStaffAnnouncementsUnlocked) renderStaffAnnouncementsLocked();
+  }, { once: true });
+} else if (!branchStaffAnnouncementsUnlocked) {
+  renderStaffAnnouncementsLocked();
+}
+console.log("TBS Staff Dashboard v67: fail-closed announcements gate");
