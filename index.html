@@ -1158,6 +1158,90 @@
   }
 </style>
 
+
+<style id="visionV2LeavesAndHoverFix">
+  /* Remove the old navy hover-stage background completely. */
+  .hero .badge-stage,
+  .hero .badge-stage:hover,
+  .hero .badge-stage:focus,
+  .hero .badge-stage:focus-within{
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .hero .badge-stage::before,
+  .hero .badge-stage::after{
+    background:transparent!important;
+  }
+
+  /* Keep the weekly view purple/white instead of exposing the legacy navy circle. */
+  #branchAssignmentHover{
+    background:rgba(255,255,255,.985)!important;
+    border-radius:50%!important;
+    overflow:hidden!important;
+  }
+  #branchAssignmentHover .branch-assignment-hover-shell{
+    background:
+      radial-gradient(circle at 50% 35%,rgba(118,191,24,.06),transparent 42%),
+      linear-gradient(180deg,#ffffff 0%,#fbf8fd 100%)!important;
+    color:#421176!important;
+  }
+  #branchAssignmentHover .branch-assignment-hover-header{
+    background:#5b159d!important;
+    color:#fff!important;
+  }
+  #branchAssignmentHover .branch-assignment-hover-title,
+  #branchAssignmentHover .branch-assignment-hover-subtitle{
+    color:#fff!important;
+  }
+  #branchAssignmentHover .branch-calendar-split-title,
+  #branchAssignmentHover .branch-calendar-split-count{
+    color:#5b159d!important;
+  }
+  #branchAssignmentHover .branch-calendar-event,
+  #branchAssignmentHover .branch-assignment-hover-item{
+    background:#f5effa!important;
+    color:#421176!important;
+    border-color:rgba(91,21,157,.12)!important;
+  }
+  #branchAssignmentHover .branch-calendar-event:hover,
+  #branchAssignmentHover .branch-assignment-hover-item:hover{
+    background:#eef8dc!important;
+  }
+  #branchAssignmentHover .branch-assignment-hover-footer{
+    background:#5b159d!important;
+  }
+  #branchAssignmentHover .branch-assignment-hover-footer a{
+    color:#fff!important;
+  }
+
+  /* Soft botanical watermark inspired by the marketing vision. */
+  .hero::before,
+  .hero::after{
+    content:"";
+    position:absolute;
+    top:215px;
+    width:150px;
+    height:390px;
+    opacity:.13;
+    pointer-events:none;
+    z-index:0;
+    background-repeat:no-repeat;
+    background-size:contain;
+    background-position:center;
+  }
+  .hero::before{
+    left:-28px;
+    transform:rotate(-8deg);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 390'%3E%3Cg fill='none' stroke='%2376bf18' stroke-width='3'%3E%3Cpath d='M84 375C80 295 78 211 87 118C91 75 102 38 119 12'/%3E%3C/g%3E%3Cg fill='%2376bf18'%3E%3Cellipse cx='89' cy='306' rx='18' ry='39' transform='rotate(-34 89 306)'/%3E%3Cellipse cx='70' cy='257' rx='17' ry='37' transform='rotate(34 70 257)'/%3E%3Cellipse cx='91' cy='205' rx='17' ry='37' transform='rotate(-34 91 205)'/%3E%3Cellipse cx='76' cy='155' rx='16' ry='35' transform='rotate(35 76 155)'/%3E%3Cellipse cx='104' cy='103' rx='16' ry='34' transform='rotate(-31 104 103)'/%3E%3Cellipse cx='117' cy='54' rx='14' ry='30' transform='rotate(29 117 54)'/%3E%3C/g%3E%3C/svg%3E")!important;
+  }
+  .hero::after{
+    right:-28px;
+    transform:scaleX(-1) rotate(-8deg);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 390'%3E%3Cg fill='none' stroke='%2376bf18' stroke-width='3'%3E%3Cpath d='M84 375C80 295 78 211 87 118C91 75 102 38 119 12'/%3E%3C/g%3E%3Cg fill='%2376bf18'%3E%3Cellipse cx='89' cy='306' rx='18' ry='39' transform='rotate(-34 89 306)'/%3E%3Cellipse cx='70' cy='257' rx='17' ry='37' transform='rotate(34 70 257)'/%3E%3Cellipse cx='91' cy='205' rx='17' ry='37' transform='rotate(-34 91 205)'/%3E%3Cellipse cx='76' cy='155' rx='16' ry='35' transform='rotate(35 76 155)'/%3E%3Cellipse cx='104' cy='103' rx='16' ry='34' transform='rotate(-31 104 103)'/%3E%3Cellipse cx='117' cy='54' rx='14' ry='30' transform='rotate(29 117 54)'/%3E%3C/g%3E%3C/svg%3E")!important;
+  }
+  .hero>*{position:relative;z-index:1;}
+</style>
+
 </head>
 <body>
   <header class="topbar">
