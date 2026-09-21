@@ -1412,6 +1412,196 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
+
+<style id="visionV6AnnouncementsPopup">
+  /* Announcements heading / megaphone */
+  .announcements-title{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+  }
+  .announcements-megaphone{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    color:#5b159d!important;
+    flex:0 0 auto!important;
+  }
+
+  /* Make Next Event visually prominent without advertising that it is clickable. */
+  .event-announcement,
+  .event-announcement:hover,
+  .event-announcement:focus,
+  .event-announcement:focus-visible{
+    width:100%!important;
+    display:block!important;
+    text-align:left!important;
+    appearance:none!important;
+    -webkit-appearance:none!important;
+    border:0!important;
+    outline:0!important;
+    box-shadow:none!important;
+    cursor:default!important;
+    background:
+      linear-gradient(90deg,rgba(118,191,24,.11),rgba(255,255,255,0) 62%)!important;
+    border-left:5px solid #76bf18!important;
+    border-radius:4px!important;
+    padding:11px 12px 11px 15px!important;
+    margin:2px 0 7px!important;
+    font:inherit!important;
+  }
+  .event-announcement::after{display:none!important;content:none!important;}
+  .event-announcement-date{
+    color:#6a25c3!important;
+    font-size:13px!important;
+    line-height:1.15!important;
+    font-weight:900!important;
+    letter-spacing:.025em!important;
+  }
+  .event-announcement-name{
+    margin-top:3px!important;
+    color:#17366c!important;
+    font-size:17px!important;
+    line-height:1.15!important;
+    font-weight:900!important;
+  }
+  .event-announcement-meta{
+    margin-top:4px!important;
+    color:#5b5570!important;
+    font-size:12.5px!important;
+    line-height:1.2!important;
+    font-weight:600!important;
+  }
+
+  /* Restore the real centered Event Details modal created by app.js. */
+  #branchEventDetailsModal{
+    position:fixed!important;
+    inset:0!important;
+    z-index:10000!important;
+    display:none!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:24px!important;
+  }
+  #branchEventDetailsModal.is-open{
+    display:flex!important;
+  }
+  #branchEventDetailsModal .event-modal-backdrop{
+    position:absolute!important;
+    inset:0!important;
+    background:rgba(32,16,45,.58)!important;
+    backdrop-filter:blur(3px)!important;
+    -webkit-backdrop-filter:blur(3px)!important;
+  }
+  #branchEventDetailsModal .event-modal-dialog{
+    position:relative!important;
+    z-index:1!important;
+    width:min(760px,calc(100vw - 48px))!important;
+    max-height:min(82vh,780px)!important;
+    overflow:auto!important;
+    padding:28px 30px 30px!important;
+    border:1px solid rgba(91,21,157,.14)!important;
+    border-radius:22px!important;
+    background:#fffdf9!important;
+    color:#2d1743!important;
+    box-shadow:0 30px 90px rgba(25,11,36,.34)!important;
+  }
+  #branchEventDetailsModal .event-modal-close{
+    position:absolute!important;
+    top:15px!important;
+    right:16px!important;
+    width:36px!important;
+    height:36px!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:50%!important;
+    background:#f2ebf8!important;
+    color:#5b159d!important;
+    font-size:25px!important;
+    line-height:1!important;
+    cursor:pointer!important;
+  }
+  #branchEventDetailsModal .event-modal-close:hover{
+    background:#e7d9f2!important;
+  }
+  #branchEventDetailsModal .event-modal-kicker{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    margin:0 48px 7px 0!important;
+    color:#6d29bc!important;
+    font-size:13px!important;
+    font-weight:900!important;
+    letter-spacing:.08em!important;
+    text-transform:uppercase!important;
+  }
+  #branchEventDetailsModal .event-modal-kicker::before{
+    content:"▣";
+    color:#76bf18;
+    font-size:18px;
+  }
+  #branchEventModalTitle{
+    margin:0 45px 22px 0!important;
+    color:#421176!important;
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:31px!important;
+    line-height:1.08!important;
+  }
+  #branchEventDetailsModal .event-detail-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:11px!important;
+  }
+  #branchEventDetailsModal .event-detail{
+    min-width:0!important;
+    padding:12px 14px!important;
+    border:1px solid rgba(91,21,157,.10)!important;
+    border-radius:11px!important;
+    background:#faf7fc!important;
+  }
+  #branchEventDetailsModal .event-detail.wide{
+    grid-column:1 / -1!important;
+  }
+  #branchEventDetailsModal .event-detail-label{
+    margin-bottom:4px!important;
+    color:#6a25c3!important;
+    font-size:11px!important;
+    line-height:1.1!important;
+    font-weight:900!important;
+    letter-spacing:.06em!important;
+    text-transform:uppercase!important;
+  }
+  #branchEventDetailsModal .event-detail-value{
+    color:#26385f!important;
+    font-size:14px!important;
+    line-height:1.35!important;
+    font-weight:650!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  body:has(#branchEventDetailsModal.is-open){
+    overflow:hidden!important;
+  }
+
+  @media(max-width:640px){
+    #branchEventDetailsModal{padding:12px!important;}
+    #branchEventDetailsModal .event-modal-dialog{
+      width:calc(100vw - 24px)!important;
+      max-height:88vh!important;
+      padding:24px 18px!important;
+      border-radius:16px!important;
+    }
+    #branchEventDetailsModal .event-detail-grid{
+      grid-template-columns:1fr!important;
+    }
+    #branchEventDetailsModal .event-detail.wide{
+      grid-column:auto!important;
+    }
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1481,7 +1671,14 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
 
       <section class="card announcements-card" id="announcementsCard">
         <div class="panel-title-row">
-          <div class="card-title">ANNOUNCEMENTS</div>
+          <div class="card-title announcements-title">
+      <span class="announcements-megaphone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="25" height="25">
+          <path fill="currentColor" d="M21 6.4v11.2c0 .8-.9 1.3-1.6.9l-6.2-3.6H8.8l1.1 4.1c.2.8-.4 1.6-1.2 1.6H6.9c-.6 0-1.1-.4-1.2-1l-1.3-4.7H3c-1.1 0-2-.9-2-2V9c0-1.1.9-2 2-2h10.2l6.2-3.6c.7-.4 1.6.1 1.6 1v2zM3.5 9.5v3h9V9.5h-9z"/>
+        </svg>
+      </span>
+      <span>ANNOUNCEMENTS</span>
+    </div>
           <span class="live-dot">LIVE</span>
         </div>
         <div id="afterschoolToday" class="afterschool-status">Loading...</div>
