@@ -1378,6 +1378,40 @@ footer:before{content:"LOVE  •  LEARN  •  LEAD";position:absolute;left:50%;t
 footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:14px;color:#5eaa13;font-size:11px;font-weight:800}footer span,footer p{margin-top:27px!important}
 @media(max-width:1350px){.dashboard{grid-template-columns:minmax(320px,.92fr) minmax(475px,1.14fr) minmax(350px,.96fr)!important}.hero .badge-stage,.hero .badge-stage .logo-shell{width:460px!important;height:460px!important;min-width:460px!important;min-height:460px!important}.hero:before,.hero:after{width:180px!important;height:440px!important}}
 </style>
+
+<style id="visionV5AnnouncementsWelcome">
+  /* Event remains clickable, but intentionally has no visual "button/link" treatment. */
+  .event-announcement,
+  .event-announcement:hover,
+  .event-announcement:focus,
+  .event-announcement:focus-visible{
+    border:0!important;
+    border-left:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    outline:none!important;
+    cursor:default!important;
+    padding:9px 5px 10px!important;
+    margin:0!important;
+  }
+  .event-announcement::after{display:none!important;content:none!important;}
+  .event-announcement-date{color:#7132d2!important;}
+  .event-announcement-name{color:#17366c!important;}
+  .event-announcement-meta{color:#5d5870!important;}
+
+  /* Keep the announcement area clean like the marketing mockup. */
+  .announcements-card .panel-title-row{
+    border-bottom:1px solid rgba(86,54,94,.11)!important;
+  }
+  .ase-section-title{margin-top:2px!important;}
+
+  /* Personalized welcome name. */
+  #personalWelcomeName{
+    transition:opacity .18s ease;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1457,7 +1491,7 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
 
     <section class="hero">
       <div class="welcome-line"><span></span><b>WELCOME</b><span></span></div>
-      <h1>The Branch School</h1>
+      <h1 id="personalWelcomeName">The Branch School</h1>
 
       <div class="badge-stage" tabindex="0">
         <div class="logo-shell">
@@ -1586,6 +1620,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!e.target.closest(".vision-search")) hide();
   });
   input.addEventListener("keydown",e=>{if(e.key==="Escape"){hide();input.blur();}});
+});
+</script>
+
+
+<script id="visionV5PersonalWelcome">
+document.addEventListener("DOMContentLoaded", () => {
+  const profileName = document.getElementById("studentName");
+  const welcomeName = document.getElementById("personalWelcomeName");
+  if (!profileName || !welcomeName) return;
+
+  const updateWelcome = () => {
+    const full = (profileName.textContent || "").trim();
+    const placeholders = new Set(["", "Staff Member", "Connect Microsoft 365"]);
+    if (placeholders.has(full)) {
+      welcomeName.textContent = "The Branch School";
+      return;
+    }
+
+    // Use the signed-in staff member's first name for a natural greeting.
+    const firstName = full.split(/\s+/)[0];
+    welcomeName.textContent = firstName ? firstName : "The Branch School";
+  };
+
+  updateWelcome();
+  new MutationObserver(updateWelcome).observe(profileName, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
 });
 </script>
 
