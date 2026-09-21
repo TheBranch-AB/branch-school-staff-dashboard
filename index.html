@@ -810,28 +810,134 @@
 </style>
 
 
-<style id="eventAnnouncementsStyles">
-  #upcomingEvents{margin-bottom:10px;overflow:hidden}
-  #upcomingEvents::-webkit-scrollbar{width:6px}
-  #upcomingEvents::-webkit-scrollbar-thumb{background:rgba(20,48,66,.20);border-radius:10px}
-  .event-announcement{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid rgba(20,48,66,.10);background:transparent;padding:10px 4px;cursor:pointer;color:#143042}
-  .event-announcement:hover{background:rgba(146,166,139,.10);border-radius:10px}
-  .event-announcement-date{font-size:12px;font-weight:900;letter-spacing:.06em;color:#6658d8;text-transform:uppercase}
-  .event-announcement-name{font-size:14px;font-weight:900;line-height:1.25;margin-top:2px}
-  .event-announcement-meta{font-size:11px;color:#677985;margin-top:3px;line-height:1.3}
-  #branchEventDetailsModal{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:22px}
-  #branchEventDetailsModal.is-open{display:flex}
-  #branchEventDetailsModal .event-modal-backdrop{position:absolute;inset:0;background:rgba(10,24,36,.72);backdrop-filter:blur(5px)}
-  #branchEventDetailsModal .event-modal-dialog{position:relative;width:min(720px,96vw);max-height:82vh;overflow-y:auto;background:#fff;color:#143042;border-radius:22px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.34)}
-  #branchEventDetailsModal .event-modal-close{position:absolute;right:16px;top:12px;border:0;background:transparent;font-size:34px;cursor:pointer;color:#52646f}
-  #branchEventDetailsModal .event-modal-kicker{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6658d8}
-  #branchEventDetailsModal h2{font-size:26px;margin:5px 42px 18px 0;color:#143042}
-  #branchEventDetailsModal .event-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  #branchEventDetailsModal .event-detail{padding:12px 14px;border-radius:12px;background:#f5f7f4;border:1px solid #e5e9e4}
-  #branchEventDetailsModal .event-detail.wide{grid-column:1/-1}
-  #branchEventDetailsModal .event-detail-label{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#71808a;margin-bottom:4px}
-  #branchEventDetailsModal .event-detail-value{font-size:14px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
-  @media(max-width:640px){#branchEventDetailsModal .event-detail-grid{grid-template-columns:1fr}}
+<style id="marketingPurpleGreenPalette">
+  /* Alternate marketing color treatment. Layout/functionality intentionally unchanged. */
+  :root{
+    --mkt-purple:#5b1f9b;
+    --mkt-purple-dark:#421176;
+    --mkt-purple-mid:#7440bb;
+    --mkt-green:#76bf18;
+    --mkt-green-soft:#dff2b7;
+    --mkt-ivory:#fbfaf7;
+    --mkt-ink:#281541;
+    --mkt-muted:#6d6178;
+  }
+
+  html,body{background:var(--mkt-ivory)!important;color:var(--mkt-ink)!important;}
+  body{
+    background:
+      radial-gradient(circle at 50% 37%,rgba(118,191,24,.06),transparent 34%),
+      linear-gradient(180deg,#fff 0,#fbfaf7 18%,#fbfaf7 100%)!important;
+  }
+
+  .topbar{
+    background:rgba(255,255,255,.97)!important;
+    color:var(--mkt-purple)!important;
+    border-bottom:1px solid rgba(91,31,155,.11)!important;
+    box-shadow:0 4px 18px rgba(55,25,83,.08)!important;
+  }
+  .brand-logo{border-color:var(--mkt-purple)!important;}
+  .school-name{color:var(--mkt-purple-dark)!important;}
+  .dashboard-name{color:var(--mkt-green)!important;}
+
+  .header-account-copy strong,.top-clock strong,#clock{color:var(--mkt-purple-dark)!important;}
+  .header-account-copy span,.top-clock span,#date{color:#675b74!important;}
+  .header-account-copy #accountStatus{color:#55a014!important;}
+  .header-account-btn{
+    background:#fff!important;color:var(--mkt-purple)!important;
+    border-color:rgba(91,31,155,.22)!important;
+  }
+  .header-account-btn:hover{background:#faf6fd!important;}
+  .header-account-btn.is-connected{
+    background:#f1f9e6!important;color:#397c0b!important;border-color:#acd86e!important;
+  }
+
+  .card{
+    background:rgba(255,255,255,.95)!important;
+    border-color:rgba(91,31,155,.12)!important;
+    box-shadow:0 9px 24px rgba(54,30,73,.07)!important;
+  }
+  .card-title,.today-date,#todayDateMirror,
+  .quick-list a,.quick-links a,
+  .branch-inbox-count span,.branch-inbox-message,
+  .ase-program-name,.ase-section-title{
+    color:var(--mkt-purple-dark)!important;
+  }
+  .today-copy,.branch-inbox-count,.branch-inbox-message-top span,
+  .ase-program-meta,.ase-empty{color:var(--mkt-muted)!important;}
+
+  .quick-list a,.quick-links a{border-bottom-color:rgba(91,31,155,.10)!important;}
+  .quick-list a:hover,.quick-links a:hover{background:#faf7fd!important;}
+  .quick-list b{color:var(--mkt-purple)!important;}
+
+  .live-dot{background:#e5f6c5!important;color:#3c7c0d!important;border-color:#cbe99b!important;}
+  #afterschoolToday{color:var(--mkt-purple-dark)!important;}
+  .ase-prefix{color:#7441d0!important;}
+  .ase-section-title{border-bottom-color:rgba(91,31,155,.12)!important;}
+  .ase-program{border-bottom-color:rgba(91,31,155,.09)!important;}
+
+  .event-announcement{
+    background:#fff!important;
+    border-left-color:var(--mkt-green)!important;
+  }
+  .event-announcement:hover{background:#faf7fd!important;}
+  .event-announcement-date{color:#7543d2!important;}
+  .event-announcement-name{color:var(--mkt-purple-dark)!important;}
+  .event-announcement-meta{color:#655973!important;}
+
+  .hero .welcome-line b,.hero .eyebrow{color:var(--mkt-purple)!important;}
+  .hero .welcome-line span{background:var(--mkt-green)!important;}
+  .hero h1{color:var(--mkt-purple-dark)!important;}
+  .logo-help{color:var(--mkt-green)!important;}
+  .logo-caption,.logo-caption strong{color:var(--mkt-purple)!important;}
+  blockquote{color:var(--mkt-purple)!important;}
+  blockquote small{color:#604b79!important;}
+
+  .branch-inbox-heading{border-bottom-color:rgba(91,31,155,.12)!important;}
+  .branch-inbox-heading a{color:#4e930d!important;}
+  .branch-inbox-message{
+    background:#fff!important;
+    border-color:rgba(91,31,155,.12)!important;
+  }
+  .branch-inbox-message.is-unread{
+    border-left-color:var(--mkt-green)!important;
+    background:#fbfff6!important;
+  }
+
+  .right-rail .resource-grid a,.compact-resources .resource-row a{
+    background:#fff!important;
+    border-color:rgba(91,31,155,.13)!important;
+    color:var(--mkt-purple-dark)!important;
+  }
+  .right-rail .resource-grid a:hover,.compact-resources .resource-row a:hover{
+    background:#faf7fd!important;
+    border-color:rgba(91,31,155,.30)!important;
+    box-shadow:0 5px 14px rgba(91,31,155,.08)!important;
+  }
+  .resource-icon{color:var(--mkt-purple)!important;}
+
+  .branch-inbox-messages::-webkit-scrollbar-track{background:#f3eef8!important;}
+  .branch-inbox-messages::-webkit-scrollbar-thumb,
+  #afterschoolToday::-webkit-scrollbar-thumb,
+  .right-rail .resource-grid::-webkit-scrollbar-thumb,
+  .quick-links::-webkit-scrollbar-thumb{
+    background:rgba(91,31,155,.30)!important;
+  }
+
+  footer{color:var(--mkt-purple)!important;border-top-color:rgba(91,31,155,.12)!important;}
+  footer b{color:#4e900f!important;}
+
+  #branchAssignmentHover .branch-assignment-hover-shell{
+    background:linear-gradient(180deg,rgba(80,22,137,.97),rgba(49,11,89,.98))!important;
+  }
+  #branchAssignmentHover .branch-calendar-split-count{color:#dff2b7!important;}
+
+  /* Any JS-created event popup inherits the same palette where its class names are present. */
+  .branch-event-dialog,.branch-calendar-dialog{
+    border:1px solid rgba(91,31,155,.14)!important;
+  }
+  .branch-event-kicker,.branch-calendar-kicker{color:#7040bd!important;}
+  .branch-event-dialog h2,.branch-calendar-dialog h2{color:var(--mkt-purple-dark)!important;}
 </style>
 
 </head>
@@ -889,7 +995,8 @@
           <div class="card-title">ANNOUNCEMENTS</div>
           <span class="live-dot">LIVE</span>
         </div>
-        <div id="afterschoolToday" class="afterschool-today">Loading afterschool information…</div>
+        <div id="afterschoolToday" class="afterschool-status">Loading...</div>
+        </div>
       </section>
     </section>
 
@@ -972,7 +1079,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.25.0/lib/msal-browser.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=20260920-event-popup-v61"></script>
+  <script src="app.js?v=20260921-v69"></script>
   <script>
     // Mirror the app's date into the TODAY card without changing the existing app.js clock logic.
     const mirrorDate = () => {
