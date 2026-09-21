@@ -940,6 +940,224 @@
   .branch-event-dialog h2,.branch-calendar-dialog h2{color:var(--mkt-purple-dark)!important;}
 </style>
 
+
+<style id="marketingVisionLayoutV1">
+  /* Vision mockup-inspired layout. Existing IDs and JS hooks remain intact. */
+  :root{
+    --vision-purple:#5b159d;
+    --vision-purple-dark:#3f0d73;
+    --vision-green:#76bf18;
+    --vision-bg:#fbfaf7;
+    --vision-card:#fff;
+    --vision-line:rgba(74,34,107,.13);
+  }
+
+  body{background:var(--vision-bg)!important;}
+
+  /* Slimmer white header, closer to marketing vision. */
+  .topbar{
+    min-height:104px!important;
+    padding:12px 30px!important;
+    background:#fff!important;
+    border-bottom:1px solid rgba(74,34,107,.10)!important;
+  }
+  .brand-logo{width:74px!important;height:74px!important;}
+  .school-name{
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:37px!important;
+    line-height:1!important;
+    color:var(--vision-purple-dark)!important;
+  }
+  .dashboard-name{
+    margin-top:7px!important;
+    font-size:18px!important;
+    letter-spacing:.22em!important;
+    color:var(--vision-green)!important;
+  }
+  .topbar-right{gap:24px!important;}
+
+  /* Three-column proportions matching the vision. */
+  .dashboard{
+    grid-template-columns:minmax(315px, .92fr) minmax(500px, 1.12fr) minmax(355px, .96fr)!important;
+    gap:26px!important;
+    max-width:1500px!important;
+    margin:0 auto!important;
+    padding:24px 30px 26px!important;
+    align-items:start!important;
+  }
+  .left-rail,.right-rail{gap:18px!important;}
+
+  .card{
+    border-radius:16px!important;
+    border:1px solid var(--vision-line)!important;
+    box-shadow:0 7px 22px rgba(50,26,68,.07)!important;
+  }
+  .card-title{
+    color:var(--vision-purple)!important;
+    letter-spacing:.035em!important;
+    font-size:17px!important;
+  }
+
+  /* Left rail. */
+  .today-card{min-height:145px!important;padding:20px 22px!important;}
+  .today-card .today-date,#todayDateMirror{
+    margin-top:15px!important;
+    color:var(--vision-purple)!important;
+    font-size:24px!important;
+  }
+  .today-copy{margin-top:10px!important;color:#40527a!important;}
+
+  .quick-card{padding:18px 22px!important;}
+  .quick-list a{
+    min-height:43px!important;
+    border-bottom:1px solid rgba(91,21,157,.10)!important;
+  }
+
+  .announcements-card{
+    padding:18px 20px!important;
+    min-height:300px!important;
+  }
+  .panel-title-row{padding-bottom:10px!important;border-bottom:1px solid rgba(91,21,157,.12)!important;}
+  .live-dot{
+    border-radius:999px!important;
+    padding:4px 12px!important;
+    background:#e2f4b8!important;
+    color:#34740b!important;
+  }
+  .event-announcement{
+    border-left:5px solid var(--vision-green)!important;
+    padding-left:14px!important;
+  }
+  .event-announcement-date{color:#6f38d1!important;}
+  .event-announcement-name{color:#172f62!important;}
+  .ase-prefix{color:#6733d1!important;}
+
+  /* Hero — larger title and clean white/ivory breathing room. */
+  .hero{
+    padding-top:9px!important;
+    overflow:visible!important;
+  }
+  .welcome-line{margin-bottom:8px!important;}
+  .welcome-line span{
+    width:92px!important;
+    height:2px!important;
+    background:var(--vision-green)!important;
+  }
+  .welcome-line b{
+    font-size:18px!important;
+    letter-spacing:.28em!important;
+    color:var(--vision-purple)!important;
+  }
+  .hero h1{
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:52px!important;
+    color:var(--vision-purple-dark)!important;
+    margin:8px 0 18px!important;
+  }
+  .hero .badge-stage{
+    width:500px!important;height:500px!important;
+    min-width:500px!important;min-height:500px!important;
+  }
+  .hero .badge-stage .logo-shell{
+    width:500px!important;height:500px!important;
+  }
+  .hero .badge-stage .logo-shell > img.portal-badge{
+    width:100%!important;height:100%!important;
+    object-fit:contain!important;
+    transform:translate(-50%,-50%)!important;
+  }
+  .logo-help{
+    margin-top:8px!important;
+    font-size:34px!important;
+    color:var(--vision-green)!important;
+  }
+  .logo-caption{
+    color:#6530a6!important;
+    font-size:17px!important;
+    line-height:1.35!important;
+  }
+  blockquote{
+    margin-top:16px!important;
+    color:var(--vision-purple)!important;
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-style:italic!important;
+  }
+
+  /* Right rail — roomy Outlook and 4-column resources like the vision. */
+  .branch-inbox-card{
+    max-height:320px!important;
+    min-height:300px!important;
+    padding:18px!important;
+  }
+  .branch-inbox-heading .card-title{color:var(--vision-purple)!important;}
+  .branch-inbox-heading a{color:#4d920d!important;}
+  .branch-inbox-message{
+    border-radius:10px!important;
+    background:#fff!important;
+  }
+  .branch-inbox-message.is-unread{border-left-color:var(--vision-green)!important;}
+
+  .compact-resources{
+    padding:18px!important;
+  }
+  .compact-resources .resource-row,
+  .right-rail .resource-grid{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+    max-height:390px!important;
+  }
+  .compact-resources .resource-row a,
+  .right-rail .resource-grid a{
+    height:105px!important;
+    min-height:105px!important;
+    padding:10px 5px!important;
+    border-radius:10px!important;
+    border:1px solid rgba(91,21,157,.13)!important;
+    background:#fff!important;
+  }
+  .right-rail .resource-grid .resource-icon,
+  .compact-resources .resource-row .resource-icon{
+    font-size:36px!important;
+    line-height:1!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    color:var(--vision-purple)!important;
+  }
+  .compact-resources .resource-row span:not(.resource-icon),
+  .right-rail .resource-grid span:not(.resource-icon){
+    font-size:12px!important;
+    line-height:1.12!important;
+    color:#182f62!important;
+  }
+
+  footer{
+    margin-top:0!important;
+    padding:18px 30px!important;
+    color:var(--vision-purple)!important;
+    letter-spacing:.18em!important;
+    border-top:1px solid rgba(91,21,157,.10)!important;
+  }
+
+  /* Responsive fallbacks. */
+  @media(max-width:1250px){
+    .dashboard{
+      grid-template-columns:minmax(280px,.9fr) minmax(430px,1.1fr) minmax(320px,.95fr)!important;
+      gap:18px!important;padding-left:18px!important;padding-right:18px!important;
+    }
+    .hero .badge-stage,.hero .badge-stage .logo-shell{
+      width:440px!important;height:440px!important;min-width:440px!important;min-height:440px!important;
+    }
+    .hero h1{font-size:45px!important;}
+    .compact-resources .resource-row,.right-rail .resource-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+  }
+  @media(max-width:980px){
+    .dashboard{grid-template-columns:1fr!important;}
+    .hero{order:-1!important;}
+    .compact-resources .resource-row,.right-rail .resource-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
