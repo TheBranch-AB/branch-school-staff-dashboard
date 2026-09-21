@@ -1691,6 +1691,78 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
+
+<style id="visionV8LeafWreath">
+  /* Kill the old hero-wide leaves. */
+  .hero::before,.hero::after{
+    display:none!important;
+    content:none!important;
+    background:none!important;
+  }
+
+  /* Let the foliage extend outside the circular logo without clipping. */
+  .hero .badge-stage{
+    overflow:visible!important;
+    isolation:isolate!important;
+  }
+
+  .hero .badge-stage .logo-shell{
+    z-index:3!important;
+    overflow:hidden!important;
+  }
+
+  .center-leaf-wreath{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    width:640px!important;
+    height:610px!important;
+    transform:translate(-50%,-50%)!important;
+    z-index:1!important;
+    pointer-events:none!important;
+  }
+
+  .leaf-branch{
+    position:absolute!important;
+    top:28px!important;
+    width:225px!important;
+    height:550px!important;
+    opacity:.34!important;
+    background-repeat:no-repeat!important;
+    background-position:center!important;
+    background-size:contain!important;
+    filter:saturate(.78)!important;
+  }
+
+  .leaf-left{
+    left:0!important;
+    transform:rotate(-7deg)!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 225 550'%3E%3Cg fill='none' stroke='%237fbd43' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M180 520 C142 438 120 361 111 278 C102 195 112 111 154 29'/%3E%3Cpath d='M137 426 C104 414 79 393 58 365'/%3E%3Cpath d='M120 359 C88 347 61 325 42 296'/%3E%3Cpath d='M111 288 C78 274 55 252 39 223'/%3E%3Cpath d='M113 216 C143 197 165 174 180 145'/%3E%3Cpath d='M124 150 C153 131 174 107 187 79'/%3E%3C/g%3E%3Cg fill='%239bca68'%3E%3Cellipse cx='127' cy='446' rx='24' ry='48' transform='rotate(-39 127 446)'/%3E%3Cellipse cx='84' cy='397' rx='23' ry='45' transform='rotate(39 84 397)'/%3E%3Cellipse cx='108' cy='355' rx='22' ry='44' transform='rotate(-38 108 355)'/%3E%3Cellipse cx='65' cy='313' rx='22' ry='43' transform='rotate(40 65 313)'/%3E%3Cellipse cx='106' cy='276' rx='21' ry='42' transform='rotate(-39 106 276)'/%3E%3Cellipse cx='63' cy='237' rx='21' ry='41' transform='rotate(39 63 237)'/%3E%3Cellipse cx='126' cy='207' rx='21' ry='42' transform='rotate(37 126 207)'/%3E%3Cellipse cx='158' cy='164' rx='20' ry='40' transform='rotate(39 158 164)'/%3E%3Cellipse cx='143' cy='132' rx='20' ry='39' transform='rotate(-35 143 132)'/%3E%3Cellipse cx='174' cy='91' rx='19' ry='37' transform='rotate(36 174 91)'/%3E%3Cellipse cx='157' cy='58' rx='17' ry='34' transform='rotate(-31 157 58)'/%3E%3C/g%3E%3C/svg%3E")!important;
+  }
+
+  .leaf-right{
+    right:0!important;
+    transform:scaleX(-1) rotate(-7deg)!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 225 550'%3E%3Cg fill='none' stroke='%237fbd43' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M180 520 C142 438 120 361 111 278 C102 195 112 111 154 29'/%3E%3Cpath d='M137 426 C104 414 79 393 58 365'/%3E%3Cpath d='M120 359 C88 347 61 325 42 296'/%3E%3Cpath d='M111 288 C78 274 55 252 39 223'/%3E%3Cpath d='M113 216 C143 197 165 174 180 145'/%3E%3Cpath d='M124 150 C153 131 174 107 187 79'/%3E%3C/g%3E%3Cg fill='%239bca68'%3E%3Cellipse cx='127' cy='446' rx='24' ry='48' transform='rotate(-39 127 446)'/%3E%3Cellipse cx='84' cy='397' rx='23' ry='45' transform='rotate(39 84 397)'/%3E%3Cellipse cx='108' cy='355' rx='22' ry='44' transform='rotate(-38 108 355)'/%3E%3Cellipse cx='65' cy='313' rx='22' ry='43' transform='rotate(40 65 313)'/%3E%3Cellipse cx='106' cy='276' rx='21' ry='42' transform='rotate(-39 106 276)'/%3E%3Cellipse cx='63' cy='237' rx='21' ry='41' transform='rotate(39 63 237)'/%3E%3Cellipse cx='126' cy='207' rx='21' ry='42' transform='rotate(37 126 207)'/%3E%3Cellipse cx='158' cy='164' rx='20' ry='40' transform='rotate(39 158 164)'/%3E%3Cellipse cx='143' cy='132' rx='20' ry='39' transform='rotate(-35 143 132)'/%3E%3Cellipse cx='174' cy='91' rx='19' ry='37' transform='rotate(36 174 91)'/%3E%3Cellipse cx='157' cy='58' rx='17' ry='34' transform='rotate(-31 157 58)'/%3E%3C/g%3E%3C/svg%3E")!important;
+  }
+
+  /* Calendar hover stays above both the seal and foliage. */
+  #branchAssignmentHover{
+    z-index:6!important;
+  }
+
+  @media(max-width:1350px){
+    .center-leaf-wreath{
+      width:570px!important;
+      height:550px!important;
+    }
+    .leaf-branch{
+      width:200px!important;
+      height:500px!important;
+    }
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1780,6 +1852,10 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
       <h1 id="personalWelcomeName">The Branch School</h1>
 
       <div class="badge-stage" tabindex="0">
+        <div class="center-leaf-wreath" aria-hidden="true">
+          <span class="leaf-branch leaf-left"></span>
+          <span class="leaf-branch leaf-right"></span>
+        </div>
         <div class="logo-shell">
           <img
             src="assets/dash2.png?v=20260921"
