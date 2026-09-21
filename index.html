@@ -1242,6 +1242,116 @@
   .hero>*{position:relative;z-index:1;}
 </style>
 
+
+<style id="visionV3FullMockup">
+  /* Full marketing mockup execution */
+  .topbar{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:auto minmax(410px,1fr) minmax(250px,330px) auto!important;
+    align-items:center!important;
+    column-gap:22px!important;
+    min-height:108px!important;
+    padding:10px 30px 18px!important;
+  }
+  .brand{min-width:405px!important;}
+  .school-name{font-size:38px!important;white-space:nowrap!important;}
+  .dashboard-name{font-size:18px!important;}
+
+  .vision-topnav{
+    display:flex;align-items:stretch;justify-content:center;gap:10px;
+    height:76px;
+  }
+  .vision-nav{
+    position:relative;display:flex;min-width:68px;flex-direction:column;
+    align-items:center;justify-content:center;gap:4px;padding:7px 8px 10px;
+    text-decoration:none!important;color:#4c137f!important;border-radius:9px;
+    transition:background .16s ease,transform .16s ease;
+  }
+  .vision-nav span{font-size:28px;line-height:1;color:#5b159d;}
+  .vision-nav b{font-size:12px;line-height:1;font-weight:800;}
+  .vision-nav:hover{background:#f7f2fb;transform:translateY(-1px);}
+  .vision-nav.active::after{
+    content:"";position:absolute;left:13px;right:13px;bottom:0;height:4px;
+    border-radius:4px;background:#76bf18;
+  }
+
+  .vision-search{
+    position:relative;display:flex;align-items:center;gap:7px;
+    width:100%;height:42px;padding:0 12px;border-radius:9px;
+    border:1px solid rgba(91,21,157,.14);background:#f7f7f6;
+  }
+  .vision-search>span{font-size:23px;color:#5b159d;line-height:1;}
+  .vision-search input{
+    min-width:0;width:100%;border:0;outline:0;background:transparent;
+    color:#421176;font:600 13px/1.2 inherit;
+  }
+  .vision-search input::placeholder{color:#81788a;}
+  .vision-search-results{
+    position:absolute;z-index:500;top:48px;left:0;right:0;
+    max-height:320px;overflow:auto;padding:7px;background:#fff;
+    border:1px solid rgba(91,21,157,.14);border-radius:10px;
+    box-shadow:0 15px 35px rgba(50,20,75,.16);
+  }
+  .vision-search-result{
+    display:block;padding:9px 10px;border-radius:7px;text-decoration:none!important;
+    color:#421176!important;font-size:12px;font-weight:750;
+  }
+  .vision-search-result:hover{background:#f4ecfa;}
+
+  .topbar-right{justify-self:end!important;}
+  .vision-header-tagline{
+    position:absolute;right:31px;bottom:4px;display:flex;align-items:center;gap:12px;
+    color:#551591;font-size:12px;font-weight:900;letter-spacing:.22em;
+  }
+  .vision-header-tagline i{
+    display:block;width:6px;height:6px;border-radius:50%;background:#76bf18;
+  }
+
+  /* Make main canvas fill more like the supplied marketing composition. */
+  .dashboard{
+    max-width:1490px!important;
+    grid-template-columns:minmax(335px,.92fr) minmax(500px,1.14fr) minmax(390px,.98fr)!important;
+    gap:28px!important;padding-top:22px!important;
+  }
+  .left-rail,.right-rail{gap:18px!important;}
+  .today-card{min-height:142px!important;}
+  .announcements-card{min-height:315px!important;}
+  .branch-inbox-card{min-height:310px!important;}
+  .hero h1{font-size:55px!important;margin-top:8px!important;}
+
+  /* Botanical branches should frame the badge, not sit at the far browser edges. */
+  .hero::before,.hero::after{
+    top:210px!important;width:145px!important;height:410px!important;opacity:.10!important;
+  }
+  .hero::before{left:-42px!important;}
+  .hero::after{right:-42px!important;}
+
+  /* Center badge + soft ivory halo like the vision. */
+  .hero .badge-stage::after{
+    content:"";position:absolute;inset:16px;border-radius:50%;z-index:-1;
+    background:radial-gradient(circle,rgba(255,255,255,.88) 0 64%,rgba(118,191,24,.035) 75%,transparent 78%)!important;
+  }
+
+  /* Give resource tiles a more consistent icon treatment. */
+  .right-rail .resource-grid .resource-icon,
+  .compact-resources .resource-row .resource-icon{
+    filter:saturate(.82);
+  }
+
+  @media(max-width:1320px){
+    .topbar{grid-template-columns:auto 1fr auto!important;}
+    .vision-search{display:none!important;}
+    .brand{min-width:340px!important;}
+    .vision-topnav{gap:2px!important;}
+  }
+  @media(max-width:1120px){
+    .vision-topnav{display:none!important;}
+    .topbar{grid-template-columns:1fr auto!important;}
+    .vision-header-tagline{display:none!important;}
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1253,7 +1363,20 @@
       </div>
     </div>
 
-    <div class="topbar-right">
+    
+<nav class="vision-topnav" aria-label="Staff dashboard navigation">
+  <a class="vision-nav active" href="#" data-target="top"><span>⌂</span><b>Home</b></a>
+  <a class="vision-nav" href="#" data-target="calendar"><span>▣</span><b>Calendar</b></a>
+  <a class="vision-nav" href="#" data-target="resources"><span>▤</span><b>Resources</b></a>
+  <a class="vision-nav" href="#" data-target="announcements"><span>▧</span><b>News</b></a>
+  <a class="vision-nav" href="https://tbstechhelp.weebly.com/" target="_blank" rel="noopener"><span>◉</span><b>Support</b></a>
+</nav>
+<div class="vision-search" role="search">
+  <span aria-hidden="true">⌕</span>
+  <input id="visionDashboardSearch" type="search" placeholder="Search resources..." autocomplete="off" aria-label="Search staff resources">
+  <div id="visionSearchResults" class="vision-search-results" hidden></div>
+</div>
+<div class="topbar-right">
       <div class="header-account-panel">
         <div class="header-account-avatar" id="avatar">S</div>
         <div class="header-account-copy">
@@ -1271,7 +1394,11 @@
         <span id="date">Today</span>
       </div>
     </div>
-  </header>
+  
+<div class="vision-header-tagline" aria-hidden="true">
+  <span>LOVE</span><i></i><span>LEARN</span><i></i><span>LEAD</span>
+</div>
+</header>
 
   <main class="dashboard">
     <section class="left-rail">
@@ -1394,5 +1521,47 @@
 
 
   </script>
+
+<script id="visionV3Interactions">
+document.addEventListener("DOMContentLoaded", () => {
+  const scrollToEl = (el) => el && el.scrollIntoView({behavior:"smooth",block:"start"});
+  document.querySelectorAll(".vision-nav[data-target]").forEach(a => {
+    a.addEventListener("click", e => {
+      e.preventDefault();
+      document.querySelectorAll(".vision-nav").forEach(n=>n.classList.remove("active"));
+      a.classList.add("active");
+      const t=a.dataset.target;
+      if(t==="top") window.scrollTo({top:0,behavior:"smooth"});
+      if(t==="calendar") scrollToEl(document.querySelector(".hero"));
+      if(t==="resources") scrollToEl(document.querySelector(".right-rail"));
+      if(t==="announcements") scrollToEl(document.querySelector(".announcements-card"));
+    });
+  });
+
+  const input=document.getElementById("visionDashboardSearch");
+  const box=document.getElementById("visionSearchResults");
+  if(!input||!box) return;
+
+  const getItems=()=>[...document.querySelectorAll(".quick-list a,.quick-links a,.resource-grid a,.resource-row a")]
+    .map(a=>({label:(a.innerText||a.textContent||"").replace(/\s+/g," ").trim(),href:a.href,target:a.target}))
+    .filter(x=>x.label&&x.href);
+
+  const hide=()=>{box.hidden=true;box.innerHTML="";};
+  input.addEventListener("input",()=>{
+    const q=input.value.trim().toLowerCase();
+    if(!q){hide();return;}
+    const hits=getItems().filter(x=>x.label.toLowerCase().includes(q)).slice(0,8);
+    box.innerHTML=hits.length
+      ? hits.map(x=>`<a class="vision-search-result" href="${x.href}" ${x.target==="_blank"?'target="_blank" rel="noopener"':""}>${x.label}</a>`).join("")
+      : `<div class="vision-search-result">No matching resources</div>`;
+    box.hidden=false;
+  });
+  document.addEventListener("click",e=>{
+    if(!e.target.closest(".vision-search")) hide();
+  });
+  input.addEventListener("keydown",e=>{if(e.key==="Escape"){hide();input.blur();}});
+});
+</script>
+
 </body>
 </html>
