@@ -2465,3 +2465,15 @@ if (document.readyState === "loading") {
 }
 console.log("TBS Staff Dashboard v67: fail-closed announcements gate");
 console.log("TBS Staff Dashboard v69: fixed signed-out Outlook + Announcements tile rendering");
+
+
+(function addLargerCenterHoverCalendarText() {
+  const id = "tbs-v70-hover-calendar-type";
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = '\n/* v70 — Larger text inside the center-logo weekly hover calendar */\n#centerHoverPanel,\n#centerHoverPanel *,\n.center-hover-panel,\n.center-hover-panel *,\n.weekly-hover,\n.weekly-hover * {\n  text-rendering: optimizeLegibility;\n}\n\n#centerHoverPanel .week-title,\n.center-hover-panel .week-title,\n.weekly-hover .week-title {\n  font-size: 20px !important;\n  line-height: 1.05 !important;\n}\n\n#centerHoverPanel .week-subtitle,\n.center-hover-panel .week-subtitle,\n.weekly-hover .week-subtitle {\n  font-size: 11px !important;\n}\n\n#centerHoverPanel .calendar-section-title,\n#centerHoverPanel .week-section-title,\n.center-hover-panel .calendar-section-title,\n.center-hover-panel .week-section-title,\n.weekly-hover .calendar-section-title,\n.weekly-hover .week-section-title {\n  font-size: 12px !important;\n  letter-spacing: .08em !important;\n}\n\n#centerHoverPanel .event-title,\n#centerHoverPanel .week-event-title,\n.center-hover-panel .event-title,\n.center-hover-panel .week-event-title,\n.weekly-hover .event-title,\n.weekly-hover .week-event-title {\n  font-size: 13px !important;\n  line-height: 1.15 !important;\n  font-weight: 800 !important;\n}\n\n#centerHoverPanel .event-meta,\n#centerHoverPanel .event-time,\n#centerHoverPanel .week-event-meta,\n#centerHoverPanel .week-event-time,\n.center-hover-panel .event-meta,\n.center-hover-panel .event-time,\n.center-hover-panel .week-event-meta,\n.center-hover-panel .week-event-time,\n.weekly-hover .event-meta,\n.weekly-hover .event-time,\n.weekly-hover .week-event-meta,\n.weekly-hover .week-event-time {\n  font-size: 9px !important;\n  line-height: 1.15 !important;\n  font-weight: 700 !important;\n}\n\n#centerHoverPanel .event-count,\n#centerHoverPanel .week-event-count,\n.center-hover-panel .event-count,\n.center-hover-panel .week-event-count,\n.weekly-hover .event-count,\n.weekly-hover .week-event-count {\n  font-size: 10px !important;\n  font-weight: 800 !important;\n}\n\n#centerHoverPanel .open-calendar,\n#centerHoverPanel .calendar-link,\n.center-hover-panel .open-calendar,\n.center-hover-panel .calendar-link,\n.weekly-hover .open-calendar,\n.weekly-hover .calendar-link {\n  font-size: 11px !important;\n  font-weight: 800 !important;\n}\n';
+  document.head.appendChild(style);
+})();
+
+console.log("TBS Staff Dashboard v70: larger center hover calendar text");
