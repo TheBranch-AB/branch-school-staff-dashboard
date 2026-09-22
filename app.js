@@ -1672,7 +1672,7 @@ function setMicrosoftStatus(text) {
 function updateMicrosoftButton() {
   const button = document.getElementById("branchMicrosoftConnect");
   if (!button) return;
-  button.textContent = microsoftAccount ? "Microsoft ✓" : "Microsoft 365";
+  button.textContent = microsoftAccount ? "Exchange ✓" : "Staff Sign In";
   button.classList.toggle("is-connected", Boolean(microsoftAccount));
 }
 
@@ -2437,7 +2437,7 @@ console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
 console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
 console.log("TBS Staff Dashboard v65: independent Next Event + ASE feeds");
 
-console.log("TBS Staff Dashboard v66: announcements locked until verified Microsoft 365 staff login");
+console.log("TBS Staff Dashboard v68: Staff Sign In / Exchange connected button");
 // v67: re-assert the lock after DOM construction.
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
