@@ -1553,17 +1553,38 @@ updateDailyQuote();
 
 
 
+
+function tbsTileSignInHtml(kind) {
+  const inbox = kind === "inbox";
+  return `
+    <div class="tbs-tile-signin" style="min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 18px;color:#625b70;">
+      <div aria-hidden="true" style="font-size:24px;margin-bottom:8px;">${inbox ? "✉️" : "🔒"}</div>
+      <div style="font-size:16px;font-weight:800;color:#1d3e72;margin-bottom:5px;">${inbox ? "Exchange Inbox" : "Staff Announcements"}</div>
+      <div style="font-size:13px;line-height:1.45;margin-bottom:14px;">${inbox ? "Sign in to view your Exchange inbox." : "Sign in to view staff announcements."}</div>
+      <button type="button" class="tbs-tile-signin-button" style="border:1.5px solid #64229a;background:#fffdf9;color:#542080;border-radius:9px;padding:9px 18px;font:inherit;font-weight:800;cursor:pointer;">Staff Sign In</button>
+    </div>`;
+}
+
+function tbsWireTileSignInButtons(root = document) {
+  root.querySelectorAll(".tbs-tile-signin-button").forEach((btn) => {
+    if (btn.dataset.wired === "1") return;
+    btn.dataset.wired = "1";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      const headerButton = document.getElementById("microsoftConnectButton");
+      if (headerButton) headerButton.click();
+    });
+  });
+}
+
 /* ===== Staff-only announcements privacy gate v66 ===== */
 let branchStaffAnnouncementsUnlocked = false;
 
-function renderStaffAnnouncementsLocked(message = tbsSignedOutTilePrompt("announcements")) {
+function renderStaffAnnouncementsLocked() {
   const host = document.getElementById("afterschoolToday");
   if (!host) return;
-  host.innerHTML = `
-    <div class="ase-empty" style="display:flex;align-items:center;gap:8px;">
-      <span aria-hidden="true">🔒</span>
-      <span>${escapeHtml(message)}</span>
-    </div>`;
+  host.innerHTML = tbsTileSignInHtml("announcements");
+  tbsWireTileSignInButtons(host);
 }
 
 function isVerifiedBranchStaffEmail(email) {
@@ -1591,48 +1612,6 @@ renderStaffAnnouncementsLocked();
    Delegated, read-only access:
    User.Read + Calendars.Read + Mail.Read
 */
-
-function tbsStaffSignInFromTile(event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  const button = document.getElementById("microsoftConnectButton");
-  if (button) {
-    button.click();
-    return;
-  }
-  if (typeof connectMicrosoft === "function") connectMicrosoft();
-}
-
-function tbsSignedOutTilePrompt(kind) {
-  const isInbox = kind === "inbox";
-  return `
-    <div class="tbs-tile-signin" style="
-      min-height:170px;display:flex;flex-direction:column;align-items:center;
-      justify-content:center;text-align:center;padding:24px 18px;color:#5c5570;">
-      <div aria-hidden="true" style="
-        width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
-        margin-bottom:12px;background:#f5f9e9;color:#5b188b;font-size:23px;">
-        ${isInbox ? "✉" : "🔒"}
-      </div>
-      <div style="font-weight:800;color:#1d3e72;font-size:16px;margin-bottom:5px;">
-        ${isInbox ? "Exchange Inbox" : "Staff Announcements"}
-      </div>
-      <div style="max-width:255px;font-size:13px;line-height:1.45;margin-bottom:15px;">
-        ${isInbox ? "Sign in to view your Exchange inbox." : "Sign in to view staff announcements."}
-      </div>
-      <button type="button" onclick="tbsStaffSignInFromTile(event)" style="
-        appearance:none;border:1.5px solid #64229a;background:#fffdf9;color:#542080;
-        border-radius:9px;padding:9px 18px;font:inherit;font-weight:800;cursor:pointer;
-        box-shadow:0 2px 8px rgba(66,35,95,.08);"
-        onmouseover="this.style.borderColor='#65b820';this.style.color='#3f7f12';this.style.background='#fbfff5'"
-        onmouseout="this.style.borderColor='#64229a';this.style.color='#542080';this.style.background='#fffdf9'">
-        Staff Sign In
-      </button>
-    </div>`;
-}
-
 async function initializeMicrosoft365() {
   const button = document.getElementById("branchMicrosoftConnect");
   const status = document.getElementById("branchMicrosoftStatus");
@@ -1906,7 +1885,8 @@ function renderMicrosoftInbox(inbox, messages, failed = false) {
 
   if (!microsoftCalendarConnected) {
     countEl.textContent = "—";
-    listEl.innerHTML = '<div class="branch-inbox-empty">Sign in to view your Exchange inbox.</div>';
+    listEl.innerHTML = tbsTileSignInHtml("inbox");
+    tbsWireTileSignInButtons(listEl);
     return;
   }
 
@@ -2479,7 +2459,7 @@ console.log("TBS Staff Dashboard v63: Staff Event Feed CSV + ASE preserved");
 console.log("TBS Staff Dashboard v64: exact ASE tab + Staff Event Feed");
 console.log("TBS Staff Dashboard v65: independent Next Event + ASE feeds");
 
-console.log("TBS Staff Dashboard v69: signed-out tile Staff Sign In CTAs + Exchange connected button");
+console.log("TBS Staff Dashboard v70: fixed rendered tile sign-in cards");
 // v67: re-assert the lock after DOM construction.
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
