@@ -1895,78 +1895,6 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
-
-<style id="visionV12CleanHeaderLeafBlend">
-  /* Text-only header navigation */
-  .vision-topnav .vision-nav{
-    gap:0!important;
-    padding-left:15px!important;
-    padding-right:15px!important;
-  }
-  .vision-topnav .vision-nav > span{display:none!important;}
-
-  /* Keep the sign-in CTA clean and obvious before authentication. */
-  #branchMicrosoftConnect{
-    min-width:108px!important;
-  }
-
-  /* Light botanical branding in header/footer, using the same real asset. */
-  .topbar::before,
-  footer::before{
-    content:""!important;
-    position:absolute!important;
-    pointer-events:none!important;
-    background:url("assets/dashboard-leaves.png") center/contain no-repeat!important;
-    opacity:.055!important;
-    z-index:0!important;
-  }
-
-  .topbar::before{
-    width:470px!important;
-    height:190px!important;
-    left:50%!important;
-    top:50%!important;
-    transform:translate(-50%,-50%) rotate(2deg)!important;
-  }
-
-  /* Preserve the existing LOVE • LEARN • LEAD footer wording with a real element-like overlay. */
-  footer::before{
-    width:520px!important;
-    height:150px!important;
-    left:50%!important;
-    top:50%!important;
-    transform:translate(-50%,-50%) rotate(180deg)!important;
-  }
-
-  .topbar > *,
-  footer > *{
-    position:relative!important;
-    z-index:2!important;
-  }
-
-  /* Restore centered footer motto because ::before is now the leaf artwork. */
-  footer::after{
-    content:"LOVE  •  LEARN  •  LEAD"!important;
-    display:block!important;
-    position:absolute!important;
-    left:50%!important;
-    top:14px!important;
-    right:auto!important;
-    bottom:auto!important;
-    transform:translateX(-50%)!important;
-    color:#57149a!important;
-    font-size:17px!important;
-    font-weight:900!important;
-    letter-spacing:.22em!important;
-    white-space:nowrap!important;
-    z-index:2!important;
-  }
-
-  #branchFooterWebsite{
-    z-index:3!important;
-  }
-</style>
-
 </head>
 <body>
   <header class="topbar">
@@ -1980,11 +1908,11 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
 
     
 <nav class="vision-topnav" aria-label="Staff dashboard navigation">
-  <a class="vision-nav active" href="#" data-target="top"><b>Home</b></a>
-  <a class="vision-nav" href="#" data-target="calendar"><b>Calendar</b></a>
-  <a class="vision-nav" href="#" data-target="resources"><b>Resources</b></a>
-  <a class="vision-nav" href="#" data-target="announcements"><b>News</b></a>
-  <a class="vision-nav" href="https://tbstechhelp.weebly.com/" target="_blank" rel="noopener"><b>Support</b></a>
+  <a class="vision-nav active" href="#" data-target="top"><span>⌂</span><b>Home</b></a>
+  <a class="vision-nav" href="#" data-target="calendar"><span>▣</span><b>Calendar</b></a>
+  <a class="vision-nav" href="#" data-target="resources"><span>▤</span><b>Resources</b></a>
+  <a class="vision-nav" href="#" data-target="announcements"><span>▧</span><b>News</b></a>
+  <a class="vision-nav" href="https://tbstechhelp.weebly.com/" target="_blank" rel="noopener"><span>◉</span><b>Support</b></a>
 </nav>
 <div class="vision-search" role="search">
   <span aria-hidden="true">⌕</span>
@@ -1996,11 +1924,11 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
         <div class="header-account-avatar" id="avatar">S</div>
         <div class="header-account-copy">
           <strong id="studentName">Staff Member</strong>
-          <span id="studentEmail">Staff access</span>
+          <span id="studentEmail">Connect Microsoft 365</span>
           <span id="accountStatus">Not connected</span>
         </div>
         <div class="header-account-actions">
-          <button type="button" id="branchMicrosoftConnect" class="header-account-btn">Staff Sign In</button>
+          <button type="button" id="branchMicrosoftConnect" class="header-account-btn">Microsoft 365</button>
           
         </div>
       </div>
@@ -2199,7 +2127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const updateWelcome = () => {
     const full = (profileName.textContent || "").trim();
-    const placeholders = new Set(["", "Staff Member", "Connect Microsoft 365", "Staff access"]);
+    const placeholders = new Set(["", "Staff Member", "Connect Microsoft 365"]);
     if (placeholders.has(full)) {
       welcomeName.textContent = "The Branch School";
       return;
