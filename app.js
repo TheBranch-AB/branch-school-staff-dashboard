@@ -1630,7 +1630,11 @@ async function initializeMicrosoft365() {
       microsoftMsal.setActiveAccount?.(microsoftAccount);
       await loadMicrosoft365Data(false);
     } else {
-      setMicrosoftStatus("Connect your Exchange calendar and inbox.");
+      // Signed-out state: immediately render the polished sign-in UI
+      // inside both protected tiles instead of leaving the old placeholder text.
+      setMicrosoftStatus("Waiting for Microsoft 365...");
+      renderMicrosoftInbox(null, []);
+      renderStaffAnnouncementsLocked();
     }
 
     if (button) {
@@ -1661,6 +1665,8 @@ async function initializeMicrosoft365() {
   } catch (error) {
     console.error("Could not initialize Microsoft 365:", error);
     setMicrosoftStatus("Microsoft 365 connection unavailable.");
+    renderMicrosoftInbox(null, []);
+    renderStaffAnnouncementsLocked();
   }
 }
 
@@ -2458,3 +2464,4 @@ if (document.readyState === "loading") {
   renderStaffAnnouncementsLocked();
 }
 console.log("TBS Staff Dashboard v67: fail-closed announcements gate");
+console.log("TBS Staff Dashboard v69: fixed signed-out Outlook + Announcements tile rendering");
