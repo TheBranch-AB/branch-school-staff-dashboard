@@ -1927,8 +1927,7 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
 </nav>
 <div class="vision-search" role="search">
   <span aria-hidden="true">⌕</span>
-  <input id="visionDashboardSearch" type="search" placeholder="Search resources..." autocomplete="off" aria-label="Search staff resources">
-  <div id="visionSearchResults" class="vision-search-results" hidden></div>
+  <input id="visionDashboardSearch" type="search" placeholder="Search Google..." autocomplete="off" aria-label="Search Google">
 </div>
 <div class="topbar-right">
       <div class="header-account-panel">
@@ -2104,28 +2103,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Header search now performs a Google search in a new tab.
   const input=document.getElementById("visionDashboardSearch");
-  const box=document.getElementById("visionSearchResults");
-  if(!input||!box) return;
-
-  const getItems=()=>[...document.querySelectorAll(".quick-list a,.quick-links a,.resource-grid a,.resource-row a")]
-    .map(a=>({label:(a.innerText||a.textContent||"").replace(/\s+/g," ").trim(),href:a.href,target:a.target}))
-    .filter(x=>x.label&&x.href);
-
-  const hide=()=>{box.hidden=true;box.innerHTML="";};
-  input.addEventListener("input",()=>{
-    const q=input.value.trim().toLowerCase();
-    if(!q){hide();return;}
-    const hits=getItems().filter(x=>x.label.toLowerCase().includes(q)).slice(0,8);
-    box.innerHTML=hits.length
-      ? hits.map(x=>`<a class="vision-search-result" href="${x.href}" ${x.target==="_blank"?'target="_blank" rel="noopener"':""}>${x.label}</a>`).join("")
-      : `<div class="vision-search-result">No matching resources</div>`;
-    box.hidden=false;
+  if(!input) return;
+  input.addEventListener("keydown", e => {
+    if(e.key === "Enter") {
+      e.preventDefault();
+      const q=input.value.trim();
+      if(q) window.open("https://www.google.com/search?q=" + encodeURIComponent(q), "_blank", "noopener");
+    }
+    if(e.key === "Escape") {
+      input.value="";
+      input.blur();
+    }
   });
-  document.addEventListener("click",e=>{
-    if(!e.target.closest(".vision-search")) hide();
-  });
-  input.addEventListener("keydown",e=>{if(e.key==="Escape"){hide();input.blur();}});
 });
 </script>
 
