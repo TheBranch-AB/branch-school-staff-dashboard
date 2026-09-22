@@ -1829,6 +1829,72 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
+
+<style id="visionV11PremiumIcons">
+  /* Give the monochrome dashboard icons more depth without changing app behavior. */
+  .nav-icon,
+  .section-icon,
+  .quick-icon,
+  .resource-icon,
+  .header-icon{
+    filter: drop-shadow(0 2px 2px rgba(66,25,112,.14));
+  }
+
+  /* Header navigation: purple/green dimensional icon badges */
+  .top-nav a > :first-child,
+  .nav-item > :first-child{
+    display:inline-grid!important;
+    place-items:center!important;
+    min-width:34px!important;
+    min-height:34px!important;
+    border-radius:10px!important;
+    background:linear-gradient(145deg,#f7f0ff 0%,#eee2fa 62%,#e4f3d4 100%)!important;
+    color:#61249b!important;
+    box-shadow:inset 0 0 0 1px rgba(101,38,158,.10),0 3px 8px rgba(60,28,92,.08)!important;
+  }
+
+  /* Section-heading icons get a soft branded medallion. */
+  .card h2::first-letter,
+  .panel-title::first-letter{
+    text-shadow:0 2px 4px rgba(91,30,145,.16);
+  }
+
+  /* Resource tiles: upgrade plain purple glyphs with a subtle gradient badge. */
+  .resource-tile .icon,
+  .resource-tile > :first-child:not(span):not(div),
+  .resource-card .resource-icon{
+    border-radius:12px!important;
+    background:linear-gradient(145deg,#f4eaff,#edf7df)!important;
+    box-shadow:inset 0 0 0 1px rgba(96,32,150,.09),0 4px 9px rgba(69,28,103,.08)!important;
+  }
+
+  /* Keep colorful emoji/image icons vivid instead of washing them out. */
+  .resource-tile img,
+  .quick-link img{
+    filter:drop-shadow(0 2px 2px rgba(28,34,49,.12))!important;
+  }
+
+  /* Purple icons get a brighter branded glow on hover. */
+  .resource-tile:hover,
+  .quick-link:hover,
+  .top-nav a:hover{
+    --iconGlow: rgba(126,190,53,.18);
+  }
+  .resource-tile:hover .icon,
+  .top-nav a:hover > :first-child{
+    box-shadow:
+      inset 0 0 0 1px rgba(96,32,150,.14),
+      0 0 0 4px var(--iconGlow),
+      0 5px 12px rgba(69,28,103,.10)!important;
+  }
+
+  /* Announcements megaphone gets the green/purple treatment. */
+  .announcements-card h2::first-letter{
+    color:#64229b!important;
+    text-shadow:2px 2px 0 rgba(126,190,53,.22)!important;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
