@@ -1214,15 +1214,18 @@ function renderLogoAssignmentHover(failed = false) {
     const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
     const dayDiff = Math.round((eventDay - today) / 86400000);
 
+    const shortDay = eventDate.toLocaleDateString([], { weekday: "short" }).toUpperCase();
+    const shortDate = eventDate.toLocaleDateString([], { month: "short", day: "numeric" }).toUpperCase();
+    const timeLabel = item.timeText === "All day" ? "ALL DAY" : item.timeText;
+
     if (dayDiff === 0) {
       when.classList.add("today");
-      when.textContent = item.timeText === "All day" ? "TODAY" : item.timeText;
+      when.textContent = `TODAY • ${shortDate}${timeLabel ? ` • ${timeLabel}` : ""}`;
     } else if (dayDiff === 1) {
       when.classList.add("tomorrow");
-      when.textContent = item.timeText === "All day" ? "TOMORROW" : `TOMORROW • ${item.timeText}`;
+      when.textContent = `TOMORROW • ${shortDate}${timeLabel ? ` • ${timeLabel}` : ""}`;
     } else {
-      const day = eventDate.toLocaleDateString([], { weekday: "short" }).toUpperCase();
-      when.textContent = item.timeText === "All day" ? day : `${day} • ${item.timeText}`;
+      when.textContent = `${shortDay} • ${shortDate}${timeLabel ? ` • ${timeLabel}` : ""}`;
     }
 
     main.append(name, source);
@@ -2477,3 +2480,5 @@ console.log("TBS Staff Dashboard v69: fixed signed-out Outlook + Announcements t
 })();
 
 console.log("TBS Staff Dashboard v70: larger center hover calendar text");
+
+console.log("TBS Staff Dashboard v71: readable hover dates + centered header clock support");
