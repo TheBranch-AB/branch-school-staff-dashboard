@@ -1906,6 +1906,67 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
+
+<style id="v12GoogleSearchTile">
+  /* Search now lives in the former TODAY tile. */
+  .google-search-card{
+    min-height:148px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+  }
+  .tile-google-search{margin:14px 0 0!important;width:100%!important}
+  .tile-google-search-box{
+    min-height:52px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:0 15px;
+    box-sizing:border-box;
+    border:1px solid rgba(87,20,154,.15);
+    border-radius:11px;
+    background:#fbf9fd;
+    transition:.18s ease;
+  }
+  .tile-google-search-box:focus-within{
+    background:#fff;
+    border-color:#73bf17;
+    box-shadow:0 0 0 3px rgba(115,191,23,.12);
+  }
+  .tile-google-g{
+    color:#57149a;
+    font-weight:900;
+    font-size:18px;
+    font-family:Arial,sans-serif;
+  }
+  .tile-google-search-box input{
+    width:100%;
+    border:0!important;
+    outline:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+    padding:14px 0!important;
+    color:#17366c!important;
+    font:inherit!important;
+    font-size:16px!important;
+  }
+  .tile-google-search-box input::placeholder{color:#777184!important;opacity:1}
+  .tile-google-search-help{
+    margin-top:10px;
+    color:#657084;
+    font-size:12px;
+  }
+
+  /* With the header search removed, give the staff account area its room back. */
+  .topbar{
+    grid-template-columns:auto 1fr auto!important;
+  }
+  .topbar-right{
+    justify-self:end!important;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
@@ -1925,10 +1986,7 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   <a class="vision-nav" href="#" data-target="announcements"><span>▧</span><b>News</b></a>
   <a class="vision-nav" href="https://tbstechhelp.weebly.com/" target="_blank" rel="noopener"><span>◉</span><b>Support</b></a>
 </nav>
-<div class="vision-search" role="search">
-  <span aria-hidden="true">⌕</span>
-  <input id="visionDashboardSearch" type="search" placeholder="Search Google..." autocomplete="off" aria-label="Search Google">
-</div>
+
 <div class="topbar-right">
       <div class="header-account-panel">
         <div class="header-account-avatar" id="avatar">S</div>
@@ -1955,11 +2013,15 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
 
   <main class="dashboard">
     <section class="left-rail">
-      <section class="card today-card">
-        <div class="card-title"><span>▣</span>TODAY</div>
-        <div class="today-date" id="todayDateMirror">Loading date…</div>
-        <div class="today-copy">Your calendar and school resources, all in one place.
-        </div></div>
+      <section class="card today-card google-search-card">
+        <div class="card-title"><span>⌕</span>SEARCH GOOGLE</div>
+        <form class="tile-google-search" action="https://www.google.com/search" method="get" target="_blank">
+          <div class="tile-google-search-box">
+            <span class="tile-google-g" aria-hidden="true">G</span>
+            <input type="search" name="q" placeholder="Search Google..." autocomplete="off" aria-label="Search Google">
+          </div>
+        </form>
+        <div class="tile-google-search-help">Press Enter to search in a new tab.</div>
       </section>
 
       <section class="card quick-card">
