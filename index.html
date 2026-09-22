@@ -1763,6 +1763,49 @@ footer:after{content:"thebranchschool.org";position:absolute;right:28px;bottom:1
   }
 </style>
 
+
+<style id="visionV9RealLeafAsset">
+  /* Use the real transparent leaf artwork uploaded to /assets. */
+  .center-leaf-wreath{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    width:650px!important;
+    height:650px!important;
+    transform:translate(-50%,-50%)!important;
+    z-index:1!important;
+    pointer-events:none!important;
+    background:url("assets/dashboard-leaves.png") center/contain no-repeat!important;
+    opacity:.25!important;
+  }
+
+  /* Disable the old CSS-generated branches. */
+  .center-leaf-wreath .leaf-branch{
+    display:none!important;
+  }
+
+  .hero .badge-stage{
+    overflow:visible!important;
+    isolation:isolate!important;
+  }
+
+  .hero .badge-stage .logo-shell{
+    position:relative!important;
+    z-index:3!important;
+  }
+
+  #branchAssignmentHover{
+    z-index:6!important;
+  }
+
+  @media(max-width:1350px){
+    .center-leaf-wreath{
+      width:590px!important;
+      height:590px!important;
+    }
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
