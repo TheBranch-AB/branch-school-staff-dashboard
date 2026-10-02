@@ -189,6 +189,15 @@
     "uid": "888-2026-09-30"
   },
   {
+    "title": "Academic Committee HMS 1st meeting",
+    "description": "",
+    "location": "",
+    "start": "2026-10-02T17:30:00Z",
+    "end": "2026-10-02T18:30:00Z",
+    "allDay": false,
+    "uid": "982-2026-10-02"
+  },
+  {
     "title": "MMA",
     "description": "",
     "location": "",
@@ -234,6 +243,15 @@
     "uid": "892-2026-10-12"
   },
   {
+    "title": "Academic Committee ISAS 1st meeting HMS",
+    "description": "",
+    "location": "",
+    "start": "2026-10-19T17:30:00Z",
+    "end": "2026-10-19T18:30:00Z",
+    "allDay": false,
+    "uid": "983-2026-10-19"
+  },
+  {
     "title": "Fall Book Fair",
     "description": "",
     "location": "",
@@ -268,6 +286,24 @@
     "end": "2026-10-22T14:30:00Z",
     "allDay": false,
     "uid": "894-2026-10-22"
+  },
+  {
+    "title": "Academic Committee 1st meeting Lower School",
+    "description": "",
+    "location": "",
+    "start": "2026-10-22T13:30:00Z",
+    "end": "2026-10-22T15:30:00Z",
+    "allDay": false,
+    "uid": "981-2026-10-22"
+  },
+  {
+    "title": "ISAS Academic Committee North Wing First meeting",
+    "description": "",
+    "location": "",
+    "start": "2026-10-23T03:30:00Z",
+    "end": "2026-10-23T04:00:00Z",
+    "allDay": false,
+    "uid": "984-2026-10-22"
   },
   {
     "title": "Class Halloween Celebrations",
