@@ -297,6 +297,15 @@
     "uid": "981-2026-10-22"
   },
   {
+    "title": "Student Support Committee ISAS 1st meeting",
+    "description": "",
+    "location": "",
+    "start": "2026-10-22T15:30:00Z",
+    "end": "2026-10-22T17:00:00Z",
+    "allDay": false,
+    "uid": "985-2026-10-22"
+  },
+  {
     "title": "ISAS Academic Committee North Wing First meeting",
     "description": "",
     "location": "",
@@ -304,6 +313,15 @@
     "end": "2026-10-23T04:00:00Z",
     "allDay": false,
     "uid": "984-2026-10-22"
+  },
+  {
+    "title": "Branch Visit to The Village School",
+    "description": "",
+    "location": "",
+    "start": "2026-10-28",
+    "end": "2026-10-28",
+    "allDay": true,
+    "uid": "988-2026-10-28"
   },
   {
     "title": "Class Halloween Celebrations",
@@ -448,6 +466,15 @@
     "end": "2026-12-05",
     "allDay": true,
     "uid": "977-2026-12-05"
+  },
+  {
+    "title": "NJHS Lunch Meeting",
+    "description": "",
+    "location": "",
+    "start": "2026-12-11",
+    "end": "2026-12-11",
+    "allDay": true,
+    "uid": "986-2026-12-11"
   },
   {
     "title": "Gingerbread Night",
