@@ -306,6 +306,15 @@
     "uid": "985-2026-10-22"
   },
   {
+    "title": "Student Activities and Community Service Committee",
+    "description": "",
+    "location": "",
+    "start": "2026-10-22T18:00:00Z",
+    "end": "2026-10-22T19:00:00Z",
+    "allDay": false,
+    "uid": "992-2026-10-22"
+  },
+  {
     "title": "Mission, Culture and Values Committee ISAS 1st mee",
     "description": "",
     "location": "",
@@ -313,6 +322,15 @@
     "end": "2026-10-22T20:00:00Z",
     "allDay": false,
     "uid": "989-2026-10-22"
+  },
+  {
+    "title": "Entrepreneurship Students Field Trip",
+    "description": "",
+    "location": "",
+    "start": "2026-10-23",
+    "end": "2026-10-23",
+    "allDay": true,
+    "uid": "991-2026-10-23"
   },
   {
     "title": "ISAS Academic Committee North Wing First meeting",
