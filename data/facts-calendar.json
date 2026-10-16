@@ -282,9 +282,9 @@
     "title": "Fall Book Fair",
     "description": "",
     "location": "",
-    "start": "2026-10-20T05:00:00Z",
-    "end": "2026-10-21T04:59:00Z",
-    "allDay": false,
+    "start": "2026-10-20",
+    "end": "2026-10-20",
+    "allDay": true,
     "uid": "893-2026-10-20"
   },
   {
@@ -300,18 +300,18 @@
     "title": "Fall Book Fair",
     "description": "",
     "location": "",
-    "start": "2026-10-21T05:00:00Z",
-    "end": "2026-10-22T04:59:00Z",
-    "allDay": false,
+    "start": "2026-10-21",
+    "end": "2026-10-21",
+    "allDay": true,
     "uid": "893-2026-10-21"
   },
   {
     "title": "Fall Book Fair",
     "description": "",
     "location": "",
-    "start": "2026-10-22T05:00:00Z",
-    "end": "2026-10-23T04:59:00Z",
-    "allDay": false,
+    "start": "2026-10-22",
+    "end": "2026-10-22",
+    "allDay": true,
     "uid": "893-2026-10-22"
   },
   {
