@@ -243,15 +243,6 @@
     "uid": "892-2026-10-12"
   },
   {
-    "title": "ISAS Self Study Meeting Specials",
-    "description": "",
-    "location": "",
-    "start": "2026-10-16T17:00:00Z",
-    "end": "2026-10-16T17:30:00Z",
-    "allDay": false,
-    "uid": "998-2026-10-16"
-  },
-  {
     "title": "NJHS Meeting and Officer Elections",
     "description": "",
     "location": "",
@@ -261,24 +252,6 @@
     "uid": "993-2026-10-19"
   },
   {
-    "title": "Academic Committee ISAS 1st meeting HMS",
-    "description": "",
-    "location": "",
-    "start": "2026-10-19T17:30:00Z",
-    "end": "2026-10-19T18:30:00Z",
-    "allDay": false,
-    "uid": "983-2026-10-19"
-  },
-  {
-    "title": "Auxiliary Programs ISAS SS committee 1st meeting",
-    "description": "",
-    "location": "",
-    "start": "2026-10-19T20:00:00Z",
-    "end": "2026-10-19T21:00:00Z",
-    "allDay": false,
-    "uid": "1002-2026-10-19"
-  },
-  {
     "title": "Fall Book Fair",
     "description": "",
     "location": "",
@@ -286,15 +259,6 @@
     "end": "2026-10-20",
     "allDay": true,
     "uid": "893-2026-10-20"
-  },
-  {
-    "title": "ISAS Self Study Advancement Meeting",
-    "description": "",
-    "location": "",
-    "start": "2026-10-20T13:30:00Z",
-    "end": "2026-10-20T14:30:00Z",
-    "allDay": false,
-    "uid": "1000-2026-10-20"
   },
   {
     "title": "Fall Book Fair",
@@ -324,60 +288,6 @@
     "uid": "894-2026-10-22"
   },
   {
-    "title": "Academic Committee 1st meeting Lower School",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T13:30:00Z",
-    "end": "2026-10-22T15:30:00Z",
-    "allDay": false,
-    "uid": "981-2026-10-22"
-  },
-  {
-    "title": "Student Support Committee ISAS 1st meeting",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T15:30:00Z",
-    "end": "2026-10-22T17:00:00Z",
-    "allDay": false,
-    "uid": "985-2026-10-22"
-  },
-  {
-    "title": "ISAS Academic Committee North Wing First meeting",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T15:30:00Z",
-    "end": "2026-10-22T17:30:00Z",
-    "allDay": false,
-    "uid": "984-2026-10-22"
-  },
-  {
-    "title": "Student Activities and Community Service Committee",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T18:00:00Z",
-    "end": "2026-10-22T19:00:00Z",
-    "allDay": false,
-    "uid": "1001-2026-10-22"
-  },
-  {
-    "title": "Student Activities and Community Service Committee",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T18:00:00Z",
-    "end": "2026-10-22T19:00:00Z",
-    "allDay": false,
-    "uid": "992-2026-10-22"
-  },
-  {
-    "title": "Mission, Culture and Values Committee ISAS 1st mee",
-    "description": "",
-    "location": "",
-    "start": "2026-10-22T18:00:00Z",
-    "end": "2026-10-22T20:00:00Z",
-    "allDay": false,
-    "uid": "989-2026-10-22"
-  },
-  {
     "title": "Entrepreneurship Students Field Trip",
     "description": "",
     "location": "",
@@ -387,16 +297,7 @@
     "uid": "991-2026-10-23"
   },
   {
-    "title": "DEI Committee Meeting, ISAS Self-Study",
-    "description": "",
-    "location": "",
-    "start": "2026-10-23T19:00:00Z",
-    "end": "2026-10-23T20:00:00Z",
-    "allDay": false,
-    "uid": "999-2026-10-23"
-  },
-  {
-    "title": "Branch Visit to The Village School",
+    "title": "8th Grade Branch Visit to The Village School",
     "description": "",
     "location": "",
     "start": "2026-10-28",
