@@ -171,6 +171,24 @@
     "uid": "897-2026-11-07"
   },
   {
+    "title": "Report Cards Sent (5th-8th)",
+    "description": "",
+    "location": "",
+    "start": "2026-11-10T06:00:00Z",
+    "end": "2026-11-11T05:59:00Z",
+    "allDay": false,
+    "uid": "1008-2026-11-10"
+  },
+  {
+    "title": "Report Cards Sent (PK3-4th)",
+    "description": "",
+    "location": "",
+    "start": "2026-11-11T18:00:00Z",
+    "end": "2026-11-11T18:30:00Z",
+    "allDay": false,
+    "uid": "902-2026-11-11"
+  },
+  {
     "title": "Theater Parent Volunteer Meeting",
     "description": "",
     "location": "",
@@ -178,15 +196,6 @@
     "end": "2026-11-12T01:00:00Z",
     "allDay": false,
     "uid": "901-2026-11-11"
-  },
-  {
-    "title": "Report Cards Sent",
-    "description": "",
-    "location": "",
-    "start": "2026-11-12T18:00:00Z",
-    "end": "2026-11-12T18:30:00Z",
-    "allDay": false,
-    "uid": "902-2026-11-12"
   },
   {
     "title": "Holiday Decor Set-up",
