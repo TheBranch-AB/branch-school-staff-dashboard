@@ -297,6 +297,15 @@
     "uid": "1006-2026-12-07"
   },
   {
+    "title": "Ballet Recital",
+    "description": "",
+    "location": "",
+    "start": "2026-12-09T22:00:00Z",
+    "end": "2026-12-09T22:30:00Z",
+    "allDay": false,
+    "uid": "1016-2026-12-09"
+  },
+  {
     "title": "NJHS Lunch Meeting",
     "description": "",
     "location": "",
